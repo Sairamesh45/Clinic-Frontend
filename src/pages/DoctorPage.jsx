@@ -1,10 +1,10 @@
 ﻿import { useMemo, useState } from 'react'
-import { Stethoscope, UserCheck, CalendarClock, PhoneIncoming, CheckCircle2, Loader2, AlertCircle, ChevronRight } from 'lucide-react'
+import { Stethoscope, UserCheck, CalendarClock, PhoneIncoming, CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
 import Button from '../components/Button'
 import axiosClient from '../api/axiosClient'
 import { useDoctorAppointments } from '../hooks/useDoctorAppointments'
 import { useToast } from '../hooks/useToast'
-import { DOCTORS } from '../data/doctors'
+import { useAuth } from '../hooks/useAuth'
 
 function SectionHeader({ icon: Icon, label, color = 'text-primary', bg = 'bg-primary/10' }) {
   return (
@@ -18,23 +18,23 @@ function SectionHeader({ icon: Icon, label, color = 'text-primary', bg = 'bg-pri
 }
 
 export default function DoctorPage() {
-  const [selectedDoctor, setSelectedDoctor] = useState(DOCTORS[0].id)
-  const { appointments, loading, error, refresh } = useDoctorAppointments(selectedDoctor)
+  const { user } = useAuth()
+  const { appointments, loading, error, refresh } = useDoctorAppointments()
   const [statusMessage, setStatusMessage] = useState(null)
   const [isCallingNext, setIsCallingNext] = useState(false)
   const [isCompleting, setIsCompleting] = useState(null)
   const { notify } = useToast()
 
   const inConsultation = useMemo(
-    () => appointments.filter((a) => a.status === 'IN_CONSULTATION'),
+    () => (appointments || []).filter((a) => a.status === 'IN_CONSULTATION'),
     [appointments],
   )
   const arrived = useMemo(
-    () => appointments.filter((a) => a.status === 'ARRIVED').slice().sort((a, b) => a.token.localeCompare(b.token, undefined, { numeric: true })),
+    () => (appointments || []).filter((a) => a.status === 'ARRIVED').slice().sort((a, b) => (a.tokenNumber || a.token || '').toString().localeCompare((b.tokenNumber || b.token || '').toString(), undefined, { numeric: true })),
     [appointments],
   )
   const booked = useMemo(
-    () => appointments.filter((a) => a.status === 'BOOKED'),
+    () => (appointments || []).filter((a) => a.status === 'BOOKED'),
     [appointments],
   )
 
@@ -81,26 +81,7 @@ export default function DoctorPage() {
         <h2 className="mt-1 text-2xl font-semibold text-neutral-dark">Today&apos;s appointments</h2>
         <p className="mt-0.5 text-sm text-neutral-dark/50">Monitor arrivals, rounds, and completion for your queue.</p>
 
-        <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-dark/50">
-              Select doctor
-            </label>
-            <div className="relative">
-              <Stethoscope className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-dark/30" />
-              <select
-                value={selectedDoctor}
-                onChange={(e) => setSelectedDoctor(e.target.value)}
-                className="appearance-none rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-10 text-sm font-medium text-neutral-dark transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10"
-              >
-                {DOCTORS.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </select>
-              <ChevronRight className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-neutral-dark/30" />
-            </div>
-          </div>
-
+        <div className="mt-5 flex justify-end">
           <Button onClick={handleCallNext} disabled={isCallingNext || loading} aria-busy={isCallingNext || loading}>
             {isCallingNext ? (
               <><Loader2 className="h-3.5 w-3.5 animate-spin" />Calling next</>
