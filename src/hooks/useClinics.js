@@ -13,7 +13,7 @@ export function useClinics() {
       try {
         const response = await axiosClient.get('/clinics')
         if (isMounted) {
-          setClinics(response.data)
+          setClinics(response.data?.data || response.data || [])
         }
       } catch (err) {
         if (isMounted) {
