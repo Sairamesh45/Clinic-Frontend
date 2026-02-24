@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { HeartPulse, Mail, Lock, User, AlertCircle, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
 import Button from '../components/Button'
 import { useAuth } from '../hooks/useAuth'
+import { APP_NAME, COPYRIGHT_YEAR, COPYRIGHT_OWNER } from '../config/appConfig'
 
 const ROLES = [
   { value: 'patient', label: 'Patient' },
@@ -61,17 +62,17 @@ export default function RegisterPage() {
     <div className="flex min-h-screen bg-background">
       {/* ─── Left branding panel ─── */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between bg-primary p-12 text-white">
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
             <HeartPulse className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-semibold tracking-wide">PulseCare</span>
+          <span className="text-lg font-semibold tracking-wide">{APP_NAME}</span>
         </div>
 
         <div className="space-y-8">
           <div>
             <h2 className="text-4xl font-bold leading-tight tracking-tight">
-              Join PulseCare today.
+              Join {APP_NAME} today.
             </h2>
             <p className="mt-4 text-white/60 text-base leading-relaxed">
               Create your account and start managing your healthcare journey with ease.
@@ -90,17 +91,17 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <p className="text-white/30 text-xs">© 2026 PulseCare. All rights reserved.</p>
+        <p className="text-white/30 text-xs">© {COPYRIGHT_YEAR} {COPYRIGHT_OWNER}. All rights reserved.</p>
       </div>
 
       {/* ─── Right form panel ─── */}
       <div className="flex flex-1 flex-col items-center justify-center p-8 overflow-y-auto">
         {/* Mobile logo */}
-        <div className="mb-8 flex items-center gap-3 lg:hidden">
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
             <HeartPulse className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-semibold text-neutral-dark">PulseCare</span>
+          <span className="text-lg font-semibold text-neutral-dark">{APP_NAME}</span>
         </div>
 
         <div className="w-full max-w-md">
@@ -134,7 +135,6 @@ export default function RegisterPage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
                   />
                 </div>
               </div>
@@ -152,7 +152,6 @@ export default function RegisterPage() {
                     required
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="you@example.com"
                   />
                 </div>
               </div>
@@ -193,7 +192,6 @@ export default function RegisterPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 6 characters"
                   />
                   <button
                     type="button"
@@ -218,7 +216,6 @@ export default function RegisterPage() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repeat your password"
                   />
                 </div>
               </div>

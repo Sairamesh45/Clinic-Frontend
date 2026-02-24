@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Activity, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import Button from '../components/Button'
 import { useAuth } from '../hooks/useAuth'
+import { APP_NAME, COPYRIGHT_YEAR, COPYRIGHT_OWNER, DEMO_ACCOUNTS } from '../config/appConfig'
 
 const ROLE_REDIRECTS = {
   patient: '/dashboard',
@@ -10,11 +11,7 @@ const ROLE_REDIRECTS = {
   reception: '/queue',
 }
 
-const DEMO_ACCOUNTS = [
-  { role: 'Patient', email: 'patient@demo.com', password: 'password' },
-  { role: 'Doctor', email: 'doctor@demo.com', password: 'password' },
-  { role: 'Reception', email: 'reception@demo.com', password: 'password' },
-]
+// Demo accounts are provided via Vite env (VITE_DEMO_ACCOUNTS) and loaded from config
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -34,7 +31,7 @@ export default function LoginPage() {
       const role = await login({ identifier, password })
       navigate(ROLE_REDIRECTS[role] || '/dashboard')
     } catch (err) {
-      setError('Invalid credentials. Please try again.')
+      setError(err?.response?.data?.message || err?.message || 'Invalid credentials. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -53,7 +50,7 @@ export default function LoginPage() {
              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md">
                 <Activity className="h-6 w-6 text-white" />
              </div>
-             <span className="text-xl font-bold tracking-tight">PulseCare</span>
+             <span className="text-xl font-bold tracking-tight">{APP_NAME}</span>
           </div>
 
           <div className="space-y-6">
@@ -68,27 +65,31 @@ export default function LoginPage() {
 
           <div className="space-y-4">
             <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-md">
-               <p className="mb-4 text-xs font-bold uppercase tracking-wider text-white/40">Quick Demo Access</p>
-               <div className="space-y-3">
-                  {DEMO_ACCOUNTS.map((acc) => (
-                    <button 
-                      key={acc.role}
-                      onClick={() => {
-                        setIdentifier(acc.email)
-                        setPassword(acc.password) // Assuming password is static for demo
-                      }}
-                      className="group flex w-full items-center justify-between rounded-lg p-2 hover:bg-white/5 text-left transition-colors"
-                    >
-                       <div>
-                          <p className="text-sm font-semibold text-white group-hover:text-primary-light transition-colors">{acc.role}</p>
-                          <p className="text-xs text-white/50">{acc.email}</p>
-                       </div>
-                       <ArrowRight className="h-4 w-4 text-white/20 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                    </button>
-                  ))}
-               </div>
+               {DEMO_ACCOUNTS && DEMO_ACCOUNTS.length > 0 && (
+                 <>
+                   <p className="mb-4 text-xs font-bold uppercase tracking-wider text-white/40">Quick Demo Access</p>
+                   <div className="space-y-3">
+                     {DEMO_ACCOUNTS.map((acc) => (
+                       <button
+                         key={acc.role}
+                         onClick={() => {
+                           setIdentifier(acc.email)
+                           if (acc.password) setPassword(acc.password)
+                         }}
+                         className="group flex w-full items-center justify-between rounded-lg p-2 hover:bg-white/5 text-left transition-colors"
+                       >
+                         <div>
+                           <p className="text-sm font-semibold text-white group-hover:text-primary-light transition-colors">{acc.role}</p>
+                           <p className="text-xs text-white/50">{acc.email}</p>
+                         </div>
+                         <ArrowRight className="h-4 w-4 text-white/20 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                       </button>
+                     ))}
+                   </div>
+                 </>
+               )}
             </div>
-            <p className="text-xs text-white/30">© 2026 PulseCare Inc.</p>
+            <p className="text-xs text-white/30">© {COPYRIGHT_YEAR} {COPYRIGHT_OWNER}</p>
           </div>
         </div>
       </div>
@@ -114,7 +115,7 @@ export default function LoginPage() {
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-                      placeholder="name@example.com"
+                      placeholder={''}
                       required
                     />
                  </div>
@@ -123,16 +124,15 @@ export default function LoginPage() {
               <div className="space-y-2">
                  <div className="flex items-center justify-between">
                     <label className="text-sm font-medium text-slate-700">Password</label>
-                    <a href="#" className="text-xs font-semibold text-primary hover:text-primary-dark">Forgot password?</a>
+                    
                  </div>
                  <div className="relative">
                     <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
                     <input 
-                      type={showPassword ? "text" : "password"} 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-                      placeholder="Enter your password"
+                        placeholder={''}
                       required
                     />
                     <button 
@@ -142,6 +142,7 @@ export default function LoginPage() {
                     >
                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
+                    <button type="button" className="text-xs font-semibold text-primary hover:text-primary-dark">Forgot password?</button>
                  </div>
               </div>
               

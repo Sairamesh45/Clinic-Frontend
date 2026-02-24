@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useAppContext } from '../hooks/useAppContext'
 import { useAuth } from '../hooks/useAuth'
+import { APP_NAME } from '../config/appConfig'
 import { ToastStack } from '../context/ToastContext'
 
 const navItems = [
@@ -69,7 +70,7 @@ export default function MainLayout({ children }) {
             <Activity className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="font-heading text-lg font-bold text-slate-800 leading-tight">PulseCare</h1>
+            <h1 className="font-heading text-lg font-bold text-slate-800 leading-tight">{APP_NAME}</h1>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Clinic Portal</p>
           </div>
         </div>
