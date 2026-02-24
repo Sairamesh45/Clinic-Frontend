@@ -42,7 +42,7 @@ export default function DoctorPage() {
     setIsCallingNext(true)
     setStatusMessage(null)
     try {
-      await axiosClient.post(`/appointments/${selectedDoctor}/next`)
+      await axiosClient.post(`/appointments/${user?.doctorId}/next`)
       notify({ type: 'success', message: 'Called the next patient in line.' })
       await refresh()
       setStatusMessage('Next patient called.')
