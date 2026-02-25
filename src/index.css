@@ -79,3 +79,35 @@ body {
 .leaflet-control-attribution {
   @apply bg-white/90 backdrop-blur-md text-xs text-slate-600 border-0 rounded-lg;
 }
+
+/* Custom marker styling */
+.custom-marker {
+  transition: all 0.2s ease-in-out;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.custom-marker:hover {
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+  transform: translateY(-2px);
+}
+
+.custom-marker.hospital {
+  filter: drop-shadow(0 4px 6px rgba(220, 38, 38, 0.3));
+}
+
+.custom-marker.clinic {
+  filter: drop-shadow(0 4px 6px rgba(5, 150, 105, 0.3));
+}
+
+.custom-marker.user-location {
+  filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.4));
+}
+
+/* Enhanced leaflet marker hover effects */
+.leaflet-marker-icon {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.leaflet-marker-icon:hover {
+  z-index: 1000 !important;
+}
