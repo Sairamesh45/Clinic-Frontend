@@ -37,3 +37,45 @@ body {
 .card-hover {
   @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover;
 }
+
+/* Leaflet Map Styles */
+.leaflet-container {
+  @apply rounded-xl font-sans;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply rounded-xl shadow-xl border-0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  @apply m-0 p-0;
+}
+
+.leaflet-popup-tip {
+  @apply shadow-md;
+}
+
+.clinic-popup .leaflet-popup-content-wrapper {
+  @apply bg-white;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.clinic-popup .leaflet-popup-tip {
+  @apply bg-white;
+}
+
+/* Fix leaflet controls for our design */
+.leaflet-control-zoom {
+  @apply border-0 shadow-lg;
+}
+
+.leaflet-control-zoom a {
+  @apply bg-white border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors;
+  border-radius: 8px !important;
+}
+
+.leaflet-control-attribution {
+  @apply bg-white/90 backdrop-blur-md text-xs text-slate-600 border-0 rounded-lg;
+}
