@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { 
-  Activity, 
-  LayoutDashboard, 
-  CalendarPlus, 
-  ListOrdered, 
-  Stethoscope, 
-  LogOut, 
-  Menu, 
+import {
+  Activity,
+  LayoutDashboard,
+  CalendarPlus,
+  ListOrdered,
+  Stethoscope,
+  LogOut,
+  Menu,
   X,
   Bell,
   Search,
-  User 
+  User,
+  CalendarClock,
+  Clock3,
 } from 'lucide-react'
 import { useAppContext } from '../hooks/useAppContext'
 import { useAuth } from '../hooks/useAuth'
@@ -22,7 +24,9 @@ const navItems = [
   { label: 'Dashboard', path: '/dashboard', roles: ['patient'], icon: LayoutDashboard },
   { label: 'Book Appointment', path: '/book', roles: ['patient'], icon: CalendarPlus },
   { label: 'Queue Management', path: '/queue', roles: ['reception'], icon: ListOrdered },
+  { label: 'Clinic Hours', path: '/settings/clinic-hours', roles: ['reception'], icon: CalendarClock },
   { label: 'Doctor Panel', path: '/doctor', roles: ['doctor'], icon: Stethoscope },
+  { label: 'Availability', path: '/settings/doctor-availability', roles: ['doctor'], icon: Clock3 },
 ]
 
 export default function MainLayout({ children }) {

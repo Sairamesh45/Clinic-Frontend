@@ -10,6 +10,8 @@ import RegisterPage from './pages/RegisterPage'
 import BookPage from './pages/BookPage'
 import QueuePage from './pages/QueuePage'
 import DoctorPage from './pages/DoctorPage'
+import ClinicHoursSettingsPage from './pages/ClinicHoursSettingsPage'
+import DoctorAvailabilitySettingsPage from './pages/DoctorAvailabilitySettingsPage'
 
 function AuthenticatedLayout({ allowedRoles }) {
   return (
@@ -37,7 +39,11 @@ function App() {
               <Route element={<AuthenticatedLayout allowedRoles={['reception', 'patient']} />}>
                 <Route path="/queue" element={<QueuePage />} />
               </Route>
+              <Route element={<AuthenticatedLayout allowedRoles={['reception']} />}>
+                <Route path="/settings/clinic-hours" element={<ClinicHoursSettingsPage />} />
+              </Route>
               <Route element={<AuthenticatedLayout allowedRoles={['doctor']} />}>
+                <Route path="/settings/doctor-availability" element={<DoctorAvailabilitySettingsPage />} />
                 <Route path="/doctor" element={<DoctorPage />} />
               </Route>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

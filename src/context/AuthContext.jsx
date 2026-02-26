@@ -1,4 +1,4 @@
-import { createContext, useCallback, useMemo, useState } from 'react'
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import axiosClient from '../api/axiosClient'
 
 const ROLE_STORAGE_KEY = 'clinic_role'
@@ -39,6 +39,34 @@ export function AuthProvider({ children }) {
       return null
     }
   })
+  // Always refresh user from the backend whenever the token changes to keep doctor/clinic links in sync
+
+  useEffect(() => {
+    let canceled = false
+    if (!token) {
+      setUser(null)
+      return undefined
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const response = await axiosClient.get('/users/me')
+        const payload = response.data?.data
+        if (!canceled && payload) {
+          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(payload))
+          setUser(payload)
+        }
+      } catch (error) {
+        console.error('Unable to refresh authenticated user', error)
+      }
+    }
+
+    fetchProfile()
+
+    return () => {
+      canceled = true
+    }
+  }, [token])
 
   const login = useCallback(async ({ identifier, password }) => {
     // Always authenticate against the real backend — no local fallback

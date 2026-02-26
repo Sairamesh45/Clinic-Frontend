@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+﻿import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   Stethoscope, 
@@ -14,7 +14,9 @@ import {
   Search,
   X,
   Navigation,
-  ListFilter
+  ListFilter,
+  Sun,
+  Moon
 } from 'lucide-react'
 import Button from '../components/Button'
 import ClinicMap from '../components/ClinicMap'
@@ -24,6 +26,20 @@ import { useGeolocation } from '../hooks/useGeolocation'
 import { useToast } from '../hooks/useToast'
 import { useAuth } from '../hooks/useAuth'
 import { useAppContext } from '../hooks/useAppContext'
+
+const WEEK_DAYS = [
+  { label: 'Mon', dayOfWeek: 1 }, { label: 'Tue', dayOfWeek: 2 },
+  { label: 'Wed', dayOfWeek: 3 }, { label: 'Thu', dayOfWeek: 4 },
+  { label: 'Fri', dayOfWeek: 5 }, { label: 'Sat', dayOfWeek: 6 },
+  { label: 'Sun', dayOfWeek: 0 },
+]
+
+const fmtTime = (value) => {
+  if (!value) return ''
+  const str = String(value)
+  const tIdx = str.indexOf('T')
+  return tIdx !== -1 ? str.slice(tIdx + 1, tIdx + 6) : str.slice(0, 5)
+}
 
 export default function BookPage() {
   const navigate = useNavigate()
@@ -45,11 +61,31 @@ export default function BookPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [confirmation, setConfirmation] = useState(null)
-  
+
+  // Clinic hours + doctor availability for the booking panel
+  const [clinicHours, setClinicHours] = useState([])
+  const [doctorAvailability, setDoctorAvailability] = useState([])
+
   // Hooks
   const { notify } = useToast()
   const { user, isAuthenticated } = useAuth()
   const { fetchAppointments } = useAppContext()
+
+  // Fetch clinic hours whenever a clinic is selected
+  useEffect(() => {
+    if (!selectedClinic) { setClinicHours([]); return }
+    axiosClient.get(`/clinics/${selectedClinic.id}/hours`)
+      .then((r) => setClinicHours(r.data?.data || r.data || []))
+      .catch(() => setClinicHours([]))
+  }, [selectedClinic])
+
+  // Fetch doctor availability whenever a doctor is selected
+  useEffect(() => {
+    if (!doctorId) { setDoctorAvailability([]); return }
+    axiosClient.get(`/doctors/${doctorId}/availability`)
+      .then((r) => setDoctorAvailability(r.data?.data || r.data || []))
+      .catch(() => setDoctorAvailability([]))
+  }, [doctorId])
 
   // Get doctors from selected clinic
   const availableDoctors = useMemo(() => {
@@ -386,6 +422,38 @@ export default function BookPage() {
             Complete Booking at {selectedClinic.name}
           </h3>
 
+          {/* Clinic Working Hours */}
+          {clinicHours.length > 0 && (
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                Clinic Working Hours
+              </label>
+              <div className="grid grid-cols-7 gap-1">
+                {WEEK_DAYS.map((day) => {
+                  const entry = clinicHours.find((h) => h.dayOfWeek === day.dayOfWeek)
+                  const closed = !entry || entry.isClosed
+                  return (
+                    <div key={day.dayOfWeek} className={`rounded-xl border p-2 text-center text-xs ${
+                      closed ? 'border-slate-100 bg-slate-50 text-slate-400' : 'border-primary/20 bg-primary/5 text-slate-700'
+                    }`}>
+                      <p className="font-bold mb-1">{day.label}</p>
+                      {closed ? (
+                        <span className="text-[10px] uppercase tracking-wide text-slate-400">Closed</span>
+                      ) : (
+                        <>
+                          <p>{fmtTime(entry.openTime)}</p>
+                          <p className="text-slate-400">–</p>
+                          <p>{fmtTime(entry.closeTime)}</p>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Doctor Selection */}
           {availableDoctors.length > 0 && (
             <div className="space-y-4">
@@ -414,6 +482,37 @@ export default function BookPage() {
                     {doctorId === doc.id && <div className="absolute top-2 right-2"><CheckCircle2 className="h-4 w-4 text-primary" /></div>}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Doctor Availability */}
+          {doctorId && doctorAvailability.length > 0 && (
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Stethoscope className="h-4 w-4 text-primary" />
+                Doctor's Available Hours
+              </label>
+              <div className="grid grid-cols-7 gap-1">
+                {WEEK_DAYS.map((day) => {
+                  const slots = doctorAvailability.filter((s) => s.dayOfWeek === day.dayOfWeek)
+                  return (
+                    <div key={day.dayOfWeek} className={`rounded-xl border p-2 text-center text-xs ${
+                      slots.length === 0 ? 'border-slate-100 bg-slate-50 text-slate-400' : 'border-emerald-200 bg-emerald-50 text-slate-700'
+                    }`}>
+                      <p className="font-bold mb-1">{day.label}</p>
+                      {slots.length === 0 ? (
+                        <span className="text-[10px] uppercase tracking-wide text-slate-400">Off</span>
+                      ) : (
+                        slots.map((s, i) => (
+                          <p key={i} className="text-[10px] leading-tight">
+                            {fmtTime(s.startTime)}–{fmtTime(s.endTime)}
+                          </p>
+                        ))
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
