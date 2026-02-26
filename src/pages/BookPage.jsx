@@ -395,8 +395,8 @@ export default function BookPage() {
 
           <ClinicMap
             clinics={displayClinics}
-            center={userLocation ? [userLocation.lat, userLocation.lng] : [40.7128, -74.0060]}
-            zoom={userLocation ? 14 : 10}
+            center={userLocation ? [userLocation.lat, userLocation.lng] : [12.9165, 79.1325]}
+            zoom={userLocation ? 14 : 13}
             onClinicSelect={handleClinicSelect}
             userLocation={userLocation}
             height="500px"
