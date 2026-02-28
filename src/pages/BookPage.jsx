@@ -21,7 +21,7 @@ import {
 import Button from '../components/Button'
 import ClinicMap from '../components/ClinicMap'
 import axiosClient from '../api/axiosClient'
-import { useClinics, useNearbyClinics, useSearchClinics } from '../hooks/useClinics'
+import { useClinics, useNearbyClinics, useSearchClinics, useClinicsInBounds } from '../hooks/useClinics'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useToast } from '../hooks/useToast'
 import { useAuth } from '../hooks/useAuth'
@@ -49,6 +49,10 @@ export default function BookPage() {
   const { clinics: allClinics, loading: loadingAllClinics } = useClinics()
   const { clinics: nearbyClinics, loading: loadingNearby } = useNearbyClinics(userLocation)
   const { clinics: searchResults, loading: searchLoading, searchClinics, clearSearch } = useSearchClinics()
+  const { clinics: viewportClinics, loading: viewportLoading, fetchForBounds } = useClinicsInBounds()
+  
+  // Track whether the user has interacted with the map (pan/zoom)
+  const [userInteractedWithMap, setUserInteractedWithMap] = useState(false)
   
   // UI states
   const [searchQuery, setSearchQuery] = useState('')
@@ -104,15 +108,18 @@ export default function BookPage() {
       return searchResults
     }
     if (viewMode === 'map') {
-      // If we have user location and nearby clinics, show nearby
+      // Once the user pans/zooms and viewport data is available, use it
+      if (userInteractedWithMap && viewportClinics.length > 0) {
+        return viewportClinics
+      }
+      // Initial load: nearby first, then all
       if (userLocation && nearbyClinics.length > 0) {
         return nearbyClinics
       }
-      // Otherwise show all clinics as fallback
       return allClinics
     }
     return []
-  }, [viewMode, searchResults, nearbyClinics, allClinics, userLocation])
+  }, [viewMode, searchResults, nearbyClinics, allClinics, userLocation, viewportClinics, userInteractedWithMap])
 
   // Determine loading state
   const isLoadingClinics = useMemo(() => {
@@ -129,6 +136,12 @@ export default function BookPage() {
     }
     return false
   }, [viewMode, searchLoading, loadingNearby, loadingAllClinics, userLocation])
+
+  // Handle map viewport changes → fetch clinics for the visible area
+  const handleBoundsChange = (bounds) => {
+    setUserInteractedWithMap(true)
+    fetchForBounds(bounds)
+  }
 
   // Handle search
   const handleSearch = async (query) => {
@@ -398,10 +411,12 @@ export default function BookPage() {
             center={userLocation ? [userLocation.lat, userLocation.lng] : [12.9165, 79.1325]}
             zoom={userLocation ? 14 : 13}
             onClinicSelect={handleClinicSelect}
+            onBoundsChange={handleBoundsChange}
             userLocation={userLocation}
             height="500px"
             className="mb-4"
             loading={isLoadingClinics}
+            viewportLoading={viewportLoading}
           />
 
           {displayClinics.length === 0 && !isLoadingClinics && (
