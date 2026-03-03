@@ -68,9 +68,9 @@ export function AuthProvider({ children }) {
     }
   }, [token])
 
-  const login = useCallback(async ({ identifier, password }) => {
+  const login = useCallback(async ({ identifier, password, phoneNumber }) => {
     // Always authenticate against the real backend — no local fallback
-    const response = await axiosClient.post('/auth/login', { identifier, password })
+    const response = await axiosClient.post('/auth/login', { identifier, password, phoneNumber })
     const data = response.data?.data || response.data
 
     const nextRole = data.role

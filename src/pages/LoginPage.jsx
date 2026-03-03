@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Activity, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Activity, Mail, Lock, Phone, AlertCircle, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import Button from '../components/Button'
 import { useAuth } from '../hooks/useAuth'
 import { APP_NAME, COPYRIGHT_YEAR, COPYRIGHT_OWNER, DEMO_ACCOUNTS } from '../config/appConfig'
@@ -17,6 +17,7 @@ export default function LoginPage() {
   const { login } = useAuth()
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -28,7 +29,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const role = await login({ identifier, password })
+      const role = await login({ identifier, password, phoneNumber })
       navigate(ROLE_REDIRECTS[role] || '/dashboard')
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || 'Invalid credentials. Please try again.')
@@ -116,6 +117,21 @@ export default function LoginPage() {
                       onChange={(e) => setIdentifier(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all"
                       placeholder={''}
+                      required
+                    />
+                 </div>
+              </div>
+
+              <div className="space-y-2">
+                 <label className="text-sm font-medium text-slate-700">Phone Number</label>
+                 <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+                    <input 
+                      type="tel" 
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                      placeholder="Enter your phone number"
                       required
                     />
                  </div>
