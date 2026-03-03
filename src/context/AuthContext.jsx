@@ -70,7 +70,10 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async ({ identifier, password, phoneNumber }) => {
     // Always authenticate against the real backend — no local fallback
-    const response = await axiosClient.post('/auth/login', { identifier, password, phoneNumber })
+    const body = { password }
+    if (identifier) body.identifier = identifier
+    if (phoneNumber) body.phoneNumber = phoneNumber
+    const response = await axiosClient.post('/auth/login', body)
     const data = response.data?.data || response.data
 
     const nextRole = data.role
@@ -88,9 +91,9 @@ export function AuthProvider({ children }) {
     return nextRole
   }, [])
 
-  const register = useCallback(async ({ name, identifier, password, role: userRole }) => {
+  const register = useCallback(async ({ name, identifier, password, role: userRole, phoneNumber }) => {
     // Always register against the real backend — no local fallback
-    await axiosClient.post('/auth/register', { name, identifier, password, role: userRole })
+    await axiosClient.post('/auth/register', { name, identifier, password, role: userRole, phoneNumber })
   }, [])
 
   const logout = useCallback(() => {
