@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useMatch } from 'react-router-dom'
 import {
   Activity,
+  Brain,
   LayoutDashboard,
   CalendarPlus,
   ListOrdered,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useAppContext } from '../hooks/useAppContext'
 import { useAuth } from '../hooks/useAuth'
+import { useDoctorAppointments } from '../hooks/useDoctorAppointments'
 import { APP_NAME } from '../config/appConfig'
 import { ToastStack } from '../context/ToastContext'
 
@@ -27,12 +29,30 @@ const navItems = [
   { label: 'Clinic Hours', path: '/settings/clinic-hours', roles: ['reception'], icon: CalendarClock },
   { label: 'Doctor Panel', path: '/doctor', roles: ['doctor'], icon: Stethoscope },
   { label: 'Availability', path: '/settings/doctor-availability', roles: ['doctor'], icon: Clock3 },
+  { label: 'AI Summary', path: '/patients', roles: ['patient', 'doctor', 'reception'], icon: Brain, dynamicPath: true },
 ]
 
 export default function MainLayout({ children }) {
-  const { role, logout } = useAuth()
+  const { role, logout, user } = useAuth()
   const { activeSection, setActiveSection } = useAppContext()
   const location = useLocation()
+  const patientMatch = useMatch('/patients/:id/*')
+  const currentPatientId = patientMatch?.params?.id
+  const { appointments } = useDoctorAppointments()
+
+  // If the user is a doctor and there is no patient in the URL, try to
+  // link the AI Summary nav item to the currently in-consultation patient.
+  const inConsultationAppt = (appointments || []).find((a) => a.status === 'IN_CONSULTATION')
+  // Determine a sensible fallback for the AI Summary link:
+  // - Patients should link to their own patient page (their user id)
+  // - Doctors should link to the currently in-consultation patient's id (if any)
+  // - Otherwise leave as null so the UI shows the disabled state
+  let fallbackPatientId = null
+  if (role === 'patient') {
+    fallbackPatientId = user?.id ?? null
+  } else {
+    fallbackPatientId = inConsultationAppt?.patientId ?? null
+  }
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Close sidebar on route change (mobile)
@@ -84,6 +104,51 @@ export default function MainLayout({ children }) {
           <p className="px-4 text-xs font-semibold uppercase text-slate-400 tracking-wider mb-4">Menu</p>
           {visibleItems.map((item) => {
             const Icon = item.icon
+
+            // Dynamic items need a patient in the URL — show disabled when none is active
+            if (item.dynamicPath) {
+              const resolvedPath = (currentPatientId || fallbackPatientId)
+                ? `/patients/${currentPatientId ?? fallbackPatientId}/ai-summary`
+                : null
+
+              if (!resolvedPath) {
+                return (
+                  <div
+                    key={item.path}
+                    title="Navigate to a patient first"
+                    className="group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium cursor-not-allowed opacity-40 select-none text-slate-400"
+                  >
+                    <Icon className="h-5 w-5 text-slate-300" />
+                    {item.label}
+                    <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-slate-300 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                      No patient
+                    </span>
+                  </div>
+                )
+              }
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={resolvedPath}
+                  className={({ isActive }) =>
+                    `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-primary/10 text-primary shadow-sm'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                      {item.label}
+                    </>
+                  )}
+                </NavLink>
+              )
+            }
+
             return (
               <NavLink
                 key={item.path}

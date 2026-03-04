@@ -1,5 +1,6 @@
 ﻿import { useMemo, useState } from 'react'
-import { Stethoscope, UserCheck, CalendarClock, PhoneIncoming, CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Stethoscope, UserCheck, CalendarClock, PhoneIncoming, CheckCircle2, Loader2, AlertCircle, Brain } from 'lucide-react'
 import Button from '../components/Button'
 import axiosClient from '../api/axiosClient'
 import { useDoctorAppointments } from '../hooks/useDoctorAppointments'
@@ -19,6 +20,7 @@ function SectionHeader({ icon: Icon, label, color = 'text-primary', bg = 'bg-pri
 
 export default function DoctorPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { appointments, loading, error, refresh } = useDoctorAppointments()
   const [statusMessage, setStatusMessage] = useState(null)
   const [isCallingNext, setIsCallingNext] = useState(false)
@@ -119,18 +121,30 @@ export default function DoctorPage() {
             <div key={appt.id} className="rounded-2xl border border-status-in-consultation/15 bg-status-in-consultation/5 p-4">
               <p className="text-sm font-semibold text-neutral-dark">{appt.patientName}</p>
               <p className="mt-0.5 text-xs text-neutral-dark/50">Token {appt.token}</p>
-              <Button
-                variant="secondary"
-                className="mt-3 w-full"
-                onClick={() => handleComplete(appt.id)}
-                disabled={isCompleting === appt.id}
-              >
-                {isCompleting === appt.id ? (
-                  <><Loader2 className="h-3.5 w-3.5 animate-spin" />Completing</>
-                ) : (
-                  <><CheckCircle2 className="h-3.5 w-3.5" />Mark Completed</>
+              <div className="mt-3 flex flex-col gap-2">
+                {appt.patientId && (
+                  <Button
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => navigate(`/patients/${appt.patientId}/ai-summary`)}
+                  >
+                    <Brain className="h-3.5 w-3.5" />
+                    AI Summary
+                  </Button>
                 )}
-              </Button>
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => handleComplete(appt.id)}
+                  disabled={isCompleting === appt.id}
+                >
+                  {isCompleting === appt.id ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />Completing</>
+                  ) : (
+                    <><CheckCircle2 className="h-3.5 w-3.5" />Mark Completed</>
+                  )}
+                </Button>
+              </div>
             </div>
           ))}
         </div>

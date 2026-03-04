@@ -27,6 +27,7 @@ export function useDoctorAppointments() {
       const normalised = raw.map((a) => ({
         ...a,
         patientName: a.patient?.name || a.patientName || 'Unknown',
+        patientId: a.patient?.id ?? a.patientId ?? null,
         token: a.tokenNumber ?? a.token,
         scheduledAt: a.date ? new Date(a.date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null,
       }))

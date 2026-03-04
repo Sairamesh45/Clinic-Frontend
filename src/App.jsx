@@ -13,6 +13,7 @@ import DoctorPage from './pages/DoctorPage'
 import ClinicDetailsPage from './pages/ClinicDetailsPage'
 import ClinicHoursSettingsPage from './pages/ClinicHoursSettingsPage'
 import DoctorAvailabilitySettingsPage from './pages/DoctorAvailabilitySettingsPage'
+import AiSummaryPage from './pages/AiSummaryPage'
 
 function AuthenticatedLayout({ allowedRoles }) {
   return (
@@ -47,6 +48,9 @@ function App() {
               <Route element={<AuthenticatedLayout allowedRoles={['doctor']} />}>
                 <Route path="/settings/doctor-availability" element={<DoctorAvailabilitySettingsPage />} />
                 <Route path="/doctor" element={<DoctorPage />} />
+              </Route>
+              <Route element={<AuthenticatedLayout allowedRoles={['patient', 'doctor', 'reception']} />}>
+                <Route path="/patients/:id/ai-summary" element={<AiSummaryPage />} />
               </Route>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
