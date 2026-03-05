@@ -20,6 +20,7 @@ import { useAiSummary } from '../hooks/useAiSummary'
 import { useAuth } from '../hooks/useAuth'
 import PatientTimeline from '../components/PatientTimeline'
 import LabTrendsChart from '../components/LabTrendsChart'
+import LabReport from '../components/LabReport'
 import AddEventForm from '../components/AddEventForm'
 import UploadDocumentForm from '../components/UploadDocumentForm'
 import Button from '../components/Button'
@@ -362,6 +363,13 @@ export default function AiSummaryPage() {
           </div>
         )}
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+           LAB REPORT — Full lab results with flags
+      ═══════════════════════════════════════════════════════════════ */}
+      {summaryResolved && (
+        <LabReport patientId={id} refreshKey={timelineKey} />
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════
            BOTTOM GRID — Timeline (left) | Lab Chart (right)
