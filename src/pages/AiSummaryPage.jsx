@@ -103,7 +103,7 @@ function SummaryError({ message, onRetry }) {
 export default function AiSummaryPage() {
   const { id } = useParams()
   const { role } = useAuth()
-  const { data, loading, error, refetch } = useAiSummary(id)
+  const { data, loading, error, processing, refetch } = useAiSummary(id)
   const [showForm, setShowForm] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
   const [timelineKey, setTimelineKey] = useState(0)
@@ -123,7 +123,7 @@ export default function AiSummaryPage() {
   }
 
   // Bottom grid shows once summary has resolved at least once; stays visible during regeneration
-  const summaryResolved = data !== null || (!loading && error !== null)
+  const summaryResolved = data !== null || (!loading && error !== null) || processing
 
   return (
     <div className="space-y-6">
@@ -190,9 +190,24 @@ export default function AiSummaryPage() {
           <div className="my-6 border-t border-slate-100" />
 
           {/* ── Summary body ── */}
-          {loading && !data && <SummarySkeleton />}
+          {loading && !data && !processing && <SummarySkeleton />}
 
-          {!loading && error && !data && (
+          {processing && (
+            <div className="flex items-start gap-4 rounded-3xl border border-primary/20 bg-primary/5 p-6">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-primary">Processing Documents</p>
+                <p className="mt-0.5 text-sm text-primary/70">
+                  Your uploaded documents are being analyzed (OCR + AI extraction). This usually takes 30–60 seconds.
+                  The summary will appear automatically when ready.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!loading && error && !data && !processing && (
             <SummaryError message={error} onRetry={() => refetch(false)} />
           )}
 

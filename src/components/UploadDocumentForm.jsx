@@ -26,9 +26,9 @@ export default function UploadDocumentForm({ patientId, onSuccess }) {
       form.append('title', title || file.name)
       form.append('document_type', documentType)
 
-      const { data } = await aiClient.post('/documents/upload', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      // Do NOT manually set Content-Type — Axios sets it automatically with the
+      // correct multipart boundary when sending a FormData object.
+      const { data } = await aiClient.post('/documents/upload', form)
 
       if (onSuccess) onSuccess(data)
     } catch (err) {
@@ -59,9 +59,11 @@ export default function UploadDocumentForm({ patientId, onSuccess }) {
             onChange={(e) => setDocumentType(e.target.value)}
           >
             <option value="other">Other</option>
-            <option value="referral">Referral</option>
-            <option value="lab_result">Lab result</option>
+            <option value="lab_report">Lab report</option>
             <option value="discharge_summary">Discharge summary</option>
+            <option value="clinical_note">Clinical note</option>
+            <option value="imaging">Imaging</option>
+            <option value="prescription">Prescription</option>
           </select>
         </div>
       </div>

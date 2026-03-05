@@ -104,6 +104,13 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  // Listen for token-expiry events dispatched by aiClient interceptor
+  useEffect(() => {
+    const handler = () => logout()
+    window.addEventListener('auth:expired', handler)
+    return () => window.removeEventListener('auth:expired', handler)
+  }, [logout])
+
   const value = useMemo(
     () => ({ role, token, user, login, register, logout, isAuthenticated: Boolean(token) }),
     [role, token, user, login, register, logout],

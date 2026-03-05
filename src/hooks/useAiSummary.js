@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import axiosClient from '../api/axiosClient'
 import aiClient from '../api/aiClient'
 
 /**
  * Fetches the AI-generated clinical summary for a patient.
  * Endpoint: GET /api/v1/patients/{patientId}/summary
+ *
+ * Automatically polls when the backend returns 202 (documents still processing).
  *
  * @param {string} patientId - UUID of the patient
  * @param {boolean} [autoFetch=true] - Fetch immediately on mount
@@ -13,6 +15,17 @@ export function useAiSummary(patientId, autoFetch = true) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [processing, setProcessing] = useState(false)
+  const pollTimer = useRef(null)
+  const pollCount = useRef(0)
+  const MAX_POLLS = 60 // ~5 minutes at 5s intervals
+
+  const clearPoll = useCallback(() => {
+    if (pollTimer.current) {
+      clearTimeout(pollTimer.current)
+      pollTimer.current = null
+    }
+  }, [])
 
   const fetch = useCallback(
     async (forceRefresh = false) => {
@@ -21,11 +34,37 @@ export function useAiSummary(patientId, autoFetch = true) {
       setError(null)
       try {
         const params = forceRefresh ? { refresh: true } : {}
-        // Ai summary is served by the Ai-Summarizer FastAPI service (/api/v1)
-        const response = await aiClient.get(`/patients/${patientId}/summary`, { params })
-        // FastAPI returns JSON with the response model under top-level fields
+        const response = await aiClient.get(`/patients/${patientId}/summary`, {
+          params,
+          // Axios treats 2xx as success, so 202 won't throw
+          validateStatus: (status) => status >= 200 && status < 300,
+        })
+
+        if (response.status === 202) {
+          // Documents still processing — poll again
+          setProcessing(true)
+          pollCount.current += 1
+          if (pollCount.current < MAX_POLLS) {
+            const delay = (response.data?.retry_after ?? 5) * 1000
+            clearPoll()
+            pollTimer.current = setTimeout(() => fetch(forceRefresh), delay)
+          } else {
+            setProcessing(false)
+            setError('Document processing is taking longer than expected. Please try again later.')
+          }
+          setLoading(false)
+          return
+        }
+
+        // Normal 200 response
+        setProcessing(false)
+        pollCount.current = 0
+        clearPoll()
         setData(response.data)
       } catch (err) {
+        setProcessing(false)
+        pollCount.current = 0
+        clearPoll()
         const detail =
           err?.response?.data?.detail ??
           err?.response?.data?.message ??
@@ -35,12 +74,13 @@ export function useAiSummary(patientId, autoFetch = true) {
         setLoading(false)
       }
     },
-    [patientId],
+    [patientId, clearPoll],
   )
 
   useEffect(() => {
     if (autoFetch) fetch()
-  }, [fetch, autoFetch])
+    return clearPoll // cleanup on unmount
+  }, [fetch, autoFetch, clearPoll])
 
-  return { data, loading, error, refetch: fetch }
+  return { data, loading, error, processing, refetch: fetch }
 }
