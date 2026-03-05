@@ -1,8 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import axiosClient from '../api/axiosClient'
 
-// Generate dummy doctor data for clinics
-const generateDummyDoctors = (clinicName = '') => {
+// Simple deterministic hash from a string → number (for stable fallback values)
+const hashString = (str) => {
+  let hash = 0
+  const s = String(str || '')
+  for (let i = 0; i < s.length; i++) {
+    hash = ((hash << 5) - hash) + s.charCodeAt(i)
+    hash |= 0 // Convert to 32-bit integer
+  }
+  return Math.abs(hash)
+}
+
+// Generate deterministic doctor data for clinics based on clinic identifier
+const generateDummyDoctors = (clinicKey = '') => {
   const doctors = [
     { id: 1, name: 'Dr. Sarah Johnson', specialty: 'General Medicine', availableSlots: 8, patientCount: 12 },
     { id: 2, name: 'Dr. Michael Chen', specialty: 'Cardiology', availableSlots: 5, patientCount: 8 },
@@ -13,33 +24,41 @@ const generateDummyDoctors = (clinicName = '') => {
     { id: 7, name: 'Dr. Anna Patel', specialty: 'Psychiatry', availableSlots: 7, patientCount: 11 },
     { id: 8, name: 'Dr. Robert Martinez', specialty: 'Emergency Medicine', availableSlots: 12, patientCount: 20 }
   ]
-  
-  // Randomly select 2-5 doctors for each clinic
-  const numDoctors = Math.floor(Math.random() * 4) + 2
-  const shuffled = doctors.sort(() => 0.5 - Math.random())
-  return shuffled.slice(0, numDoctors).map((doctor, index) => ({
+
+  // Deterministic selection based on clinic key hash
+  const h = hashString(clinicKey)
+  const numDoctors = (h % 4) + 2 // 2-5 doctors
+  // Stable sort using hash + doctor id
+  const sorted = [...doctors].sort((a, b) => (hashString(clinicKey + a.id) % 100) - (hashString(clinicKey + b.id) % 100))
+  return sorted.slice(0, numDoctors).map((doctor, index) => ({
     ...doctor,
-    id: `${clinicName}-${doctor.id}-${index}` // Make IDs unique per clinic
+    id: `${clinicKey}-${doctor.id}-${index}`
   }))
 }
 
-// Enhance clinic data with additional fields
+// Enhance clinic data with additional fields (fully deterministic — no Math.random)
 const enhanceClinicData = (clinics) => {
   return clinics.map(clinic => {
-    // Add facility type based on name or randomly assign
-    const isHospital = clinic.name?.toLowerCase().includes('hospital') || 
-                      clinic.name?.toLowerCase().includes('medical center') ||
-                      Math.random() < 0.3 // 30% chance to be hospital if not determinable
-    
+    const key = String(clinic.id || clinic.name || '')
+    const h = hashString(key)
+
+    // Determine facility type: use API value first, then name heuristic, then deterministic fallback
+    const nameLC = (clinic.name || '').toLowerCase()
+    const isHospital =
+      clinic.facilityType === 'hospital' ||
+      nameLC.includes('hospital') ||
+      nameLC.includes('medical center') ||
+      nameLC.includes('medical college')
+
     return {
       ...clinic,
-      facilityType: isHospital ? 'hospital' : 'clinic',
-      doctors: clinic.doctors || generateDummyDoctors(clinic.name || clinic.id),
-      rating: clinic.rating || (Math.random() * 2 + 3).toFixed(1), // 3.0 to 5.0
-      patientCount: clinic.patientCount || Math.floor(Math.random() * 50 + 10),
+      facilityType: clinic.facilityType || (isHospital ? 'hospital' : 'clinic'),
+      doctors: clinic.doctors || generateDummyDoctors(key),
+      rating: clinic.rating || ((h % 20 + 30) / 10).toFixed(1),           // 3.0 – 4.9
+      patientCount: clinic.patientCount || (h % 50) + 10,                  // 10 – 59
       stats: clinic.stats || {
-        estimatedWaitTime: Math.floor(Math.random() * 45 + 5),
-        totalInQueue: Math.floor(Math.random() * 15 + 2)
+        estimatedWaitTime: (h % 45) + 5,                                   // 5 – 49
+        totalInQueue: (h % 15) + 2                                         // 2 – 16
       }
     }
   })
@@ -213,4 +232,81 @@ export function useClinic(clinicId) {
   }, [clinicId])
 
   return { clinic, loading, error }
+}
+
+// ---------- Viewport-based fetching ----------
+// Fetches clinics visible in the current map viewport.
+// Uses the /clinics/nearby endpoint with center + radius derived from bounds.
+export function useClinicsInBounds() {
+  const [clinics, setClinics] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const timerRef = useRef(null)
+  const abortRef = useRef(null)
+
+  // Compute radius in km from map bounds
+  const boundsToRadius = (bounds) => {
+    if (!bounds) return 50
+    const { north, south, east, west } = bounds
+    // Haversine-ish rough estimate (degrees → km)
+    const latDiff = Math.abs(north - south)
+    const lngDiff = Math.abs(east - west)
+    const avgLat = (north + south) / 2
+    const latKm = latDiff * 111 // 1° lat ≈ 111 km
+    const lngKm = lngDiff * 111 * Math.cos((avgLat * Math.PI) / 180)
+    // Use half the diagonal as the radius
+    return Math.ceil(Math.sqrt(latKm ** 2 + lngKm ** 2) / 2) || 50
+  }
+
+  const fetchForBounds = useCallback((bounds) => {
+    if (!bounds?.center) return
+
+    // Debounce: cancel previous pending request
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (abortRef.current) abortRef.current.abort()
+
+    timerRef.current = setTimeout(async () => {
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const radius = boundsToRadius(bounds)
+        const response = await axiosClient.get('/clinics/nearby', {
+          params: {
+            lat: bounds.center.lat,
+            lng: bounds.center.lng,
+            radius,
+          },
+          signal: controller.signal,
+        })
+
+        if (!controller.signal.aborted) {
+          const rawClinics = response.data?.data || response.data || []
+          const enhancedClinics = enhanceClinicData(rawClinics)
+          setClinics(enhancedClinics)
+        }
+      } catch (err) {
+        if (err?.name !== 'CanceledError' && err?.code !== 'ERR_CANCELED') {
+          setError(err?.response?.data?.message || err?.message || 'Unable to load clinics for this area.')
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
+      }
+    }, 400) // 400ms debounce
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      if (abortRef.current) abortRef.current.abort()
+    }
+  }, [])
+
+  return { clinics, loading, error, fetchForBounds }
 }

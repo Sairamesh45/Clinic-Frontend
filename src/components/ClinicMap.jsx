@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import { Icon } from 'leaflet'
-import { MapPin, Star, Users, Clock, ArrowRight, Stethoscope, Building2, Navigation } from 'lucide-react'
+import { MapPin, Star, Users, Clock, ArrowRight, Stethoscope, Building2, Navigation, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import 'leaflet/dist/leaflet.css'
 
@@ -66,16 +66,41 @@ function ChangeView({ center, zoom }) {
   return null
 }
 
-// Component to track zoom changes
-function ZoomTracker({ onZoomChange }) {
-  const mapEvents = useMapEvents({
+// Component to track zoom / pan changes and emit bounds
+function ViewportTracker({ onZoomChange, onBoundsChange }) {
+  const map = useMapEvents({
     zoomend: () => {
-      onZoomChange(mapEvents.getZoom())
+      onZoomChange(map.getZoom())
+      emitBounds(map)
     },
     moveend: () => {
-      onZoomChange(mapEvents.getZoom())
+      onZoomChange(map.getZoom())
+      emitBounds(map)
     }
   })
+
+  // Emit bounds on initial map load so viewport-based fetching fires immediately
+  useEffect(() => {
+    // Small delay to ensure map is fully initialised and has correct bounds
+    const timer = setTimeout(() => emitBounds(map), 300)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function emitBounds(m) {
+    if (!onBoundsChange) return
+    const b = m.getBounds()
+    const c = m.getCenter()
+    onBoundsChange({
+      north: b.getNorth(),
+      south: b.getSouth(),
+      east: b.getEast(),
+      west: b.getWest(),
+      center: { lat: c.lat, lng: c.lng },
+      zoom: m.getZoom()
+    })
+  }
+
   return null
 }
 
@@ -208,15 +233,20 @@ function ClinicPopup({ clinic, onSelect }) {
   )
 }
 
+// India bounding box for coordinate validation
+const INDIA_BOUNDS = { minLat: 6.0, maxLat: 37.5, minLng: 68.0, maxLng: 98.0 }
+
 export default function ClinicMap({ 
   clinics = [], 
   center = [12.9165, 79.1325], // Default to Vellore
   zoom = 13, 
   onClinicSelect,
+  onBoundsChange,           // NEW: called with { north, south, east, west, center, zoom }
   userLocation = null,
   className = "",
   height = "400px",
-  loading = false // Add loading prop from parent
+  loading = false,           // full-screen loading (initial)
+  viewportLoading = false    // subtle spinner for viewport fetches
 }) {
   const [mapCenter, setMapCenter] = useState(center)
   const [mapZoom, setMapZoom] = useState(zoom)
@@ -226,9 +256,18 @@ export default function ClinicMap({
   const mapRef = useRef(null)
   const navigate = useNavigate()
 
-  // Debug logs to see what we're getting from API
+  // Debug + coordinate validation
   if (clinics.length > 0) {
     console.log('ClinicMap received', clinics.length, 'clinics. First:', clinics[0]?.name, clinics[0]?.latitude, clinics[0]?.longitude)
+    clinics.forEach(c => {
+      const lat = parseFloat(c.latitude)
+      const lng = parseFloat(c.longitude)
+      if (!c.latitude || !c.longitude || isNaN(lat) || isNaN(lng)) {
+        console.warn(`[ClinicMap] Missing coords for "${c.name}" (id=${c.id})`)
+      } else if (lat < INDIA_BOUNDS.minLat || lat > INDIA_BOUNDS.maxLat || lng < INDIA_BOUNDS.minLng || lng > INDIA_BOUNDS.maxLng) {
+        console.warn(`[ClinicMap] Coords outside India for "${c.name}" (id=${c.id}): [${lat}, ${lng}]`)
+      }
+    })
   }
 
   useEffect(() => {
@@ -293,7 +332,7 @@ export default function ClinicMap({
         wheelPxPerZoomLevel={60}
       >
         <ChangeView center={mapCenter} zoom={mapZoom} />
-        <ZoomTracker onZoomChange={handleZoomChange} />
+        <ViewportTracker onZoomChange={handleZoomChange} onBoundsChange={onBoundsChange} />
         
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -321,9 +360,12 @@ export default function ClinicMap({
         {clinics && clinics.length > 0 && (
           clinics
             .filter(clinic => {
-              const hasCoords = clinic.latitude && clinic.longitude && 
-                              !isNaN(clinic.latitude) && !isNaN(clinic.longitude)
-              return hasCoords
+              const lat = parseFloat(clinic.latitude)
+              const lng = parseFloat(clinic.longitude)
+              if (!clinic.latitude || !clinic.longitude || isNaN(lat) || isNaN(lng)) return false
+              // Only show markers with coords inside India
+              if (lat < INDIA_BOUNDS.minLat || lat > INDIA_BOUNDS.maxLat || lng < INDIA_BOUNDS.minLng || lng > INDIA_BOUNDS.maxLng) return false
+              return true
             })
             .map((clinic, index) => {
               const facilityType = clinic.facilityType || 'clinic'
@@ -353,7 +395,15 @@ export default function ClinicMap({
         visible={!!hoveredClinic}
       />
 
-      {/* Loading overlay - only show when explicitly loading */}
+      {/* Viewport loading indicator (subtle, top-right) */}
+      {viewportLoading && !loading && (
+        <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-full px-3 py-1.5 flex items-center gap-2 shadow-md">
+          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+          <span className="text-xs font-medium text-slate-600">Loading area…</span>
+        </div>
+      )}
+
+      {/* Full loading overlay - only show when explicitly loading */}
       {loading && (
         <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-10">
           <div className="text-center">

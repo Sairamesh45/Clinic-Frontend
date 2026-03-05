@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Activity, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Activity, Mail, Lock, Phone, AlertCircle, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import Button from '../components/Button'
 import { useAuth } from '../hooks/useAuth'
 import { APP_NAME, COPYRIGHT_YEAR, COPYRIGHT_OWNER, DEMO_ACCOUNTS } from '../config/appConfig'
@@ -15,7 +15,9 @@ const ROLE_REDIRECTS = {
 
 export default function LoginPage() {
   const { login } = useAuth()
+  const [loginMethod, setLoginMethod] = useState('email') // 'email' or 'phone'
   const [identifier, setIdentifier] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
@@ -28,7 +30,10 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const role = await login({ identifier, password })
+      const payload = loginMethod === 'email'
+        ? { identifier, password }
+        : { phoneNumber, password }
+      const role = await login(payload)
       navigate(ROLE_REDIRECTS[role] || '/dashboard')
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || 'Invalid credentials. Please try again.')
@@ -106,20 +111,69 @@ export default function LoginPage() {
            </div>
 
            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                 <label className="text-sm font-medium text-slate-700">Email Address</label>
-                 <div className="relative">
+              {/* Login method toggle */}
+              <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('email')}
+                  className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                    loginMethod === 'email'
+                      ? 'bg-white text-primary shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Mail className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
+                  Email
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('phone')}
+                  className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                    loginMethod === 'phone'
+                      ? 'bg-white text-primary shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Phone className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
+                  Phone
+                </button>
+              </div>
+
+              {/* Email input */}
+              {loginMethod === 'email' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Email Address</label>
+                  <div className="relative">
                     <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
                     <input 
                       type="email" 
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-                      placeholder={''}
+                      placeholder="Enter your email"
                       required
                     />
-                 </div>
-              </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Phone input */}
+              {loginMethod === 'phone' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+                    <input 
+                      type="tel" 
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                      placeholder="Enter your phone number"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                  <div className="flex items-center justify-between">

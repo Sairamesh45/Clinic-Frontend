@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { HeartPulse, Mail, Lock, User, AlertCircle, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
+import { HeartPulse, Mail, Lock, User, Phone, AlertCircle, Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
 import Button from '../components/Button'
 import { useAuth } from '../hooks/useAuth'
 import { APP_NAME, COPYRIGHT_YEAR, COPYRIGHT_OWNER } from '../config/appConfig'
@@ -21,6 +21,7 @@ export default function RegisterPage() {
   const { register } = useAuth()
   const [name, setName] = useState('')
   const [identifier, setIdentifier] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [role, setRole] = useState('patient')
@@ -43,9 +44,14 @@ export default function RegisterPage() {
       return
     }
 
+    if (!phoneNumber.trim()) {
+      setError('Phone number is required.')
+      return
+    }
+
     setIsSubmitting(true)
     try {
-      await register({ name, identifier, password, role })
+      await register({ name, identifier, password, role, phoneNumber })
       setSuccess(true)
       setTimeout(() => navigate('/login'), 2000)
     } catch (err) {
@@ -152,6 +158,24 @@ export default function RegisterPage() {
                     required
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Phone number */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-dark/60">
+                  Phone number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-dark/30" />
+                  <input
+                    className={inputClass}
+                    type="tel"
+                    required
+                    placeholder="Enter your phone number"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                   />
                 </div>
               </div>
