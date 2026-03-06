@@ -87,12 +87,12 @@ body {
 }
 
 .leaflet-control-zoom a {
-  @apply bg-white border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors;
+  @apply bg-white border-secondary-200 text-secondary-700 hover:bg-secondary-50 transition-colors;
   border-radius: 8px !important;
 }
 
 .leaflet-control-attribution {
-  @apply bg-white/90 backdrop-blur-md text-xs text-slate-600 border-0 rounded-lg;
+  @apply bg-white/90 backdrop-blur-md text-xs text-secondary-600 border-0 rounded-lg;
 }
 
 /* Custom marker styling */

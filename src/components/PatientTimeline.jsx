@@ -194,7 +194,7 @@ function TimelineEvent({ event, isLast }) {
 
       {/* Card */}
       <div className={`flex-1 ${isLast ? 'pb-0' : 'pb-6'}`}>
-        <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-card transition-shadow hover:shadow-card-hover">
+        <div className="rounded-lg border border-secondary-200 bg-white p-4 shadow-card transition-shadow hover:shadow-card-hover">
           {/* Card header */}
           <div className="flex flex-wrap items-center gap-2">
             <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${cfg.badge}`}>
