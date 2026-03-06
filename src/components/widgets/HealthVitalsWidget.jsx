@@ -6,7 +6,7 @@ export default function HealthVitalsWidget({ vitals = [], loading, error, onRetr
   const renderCard = (stat, idx) => (
     <div
       key={stat?.id || `${stat?.label}-${idx}`}
-      className="card p-6 flex items-center gap-4 card-hover"
+      className="bg-white rounded-lg border border-secondary-200 shadow-card p-6 flex items-center gap-4 transition-all duration-300 hover:shadow-card-hover"
     >
       <div className={`h-14 w-14 rounded-lg flex items-center justify-center flex-shrink-0 ${stat?.bg || 'bg-secondary-100'}`}>
         {stat?.icon ? <stat.icon className={`h-6 w-6 ${stat?.color || 'text-secondary-600'}`} /> : null}
@@ -29,7 +29,7 @@ export default function HealthVitalsWidget({ vitals = [], loading, error, onRetr
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {skeletonSlots.map((_, idx) => (
-          <div key={`vital-skel-${idx}`} className="card p-6 flex items-center gap-4 animate-pulse">
+          <div key={`vital-skel-${idx}`} className="bg-white rounded-lg border border-secondary-200 shadow-card p-6 flex items-center gap-4 animate-pulse">
             <div className="h-14 w-14 rounded-lg bg-secondary-200 flex-shrink-0" />
             <div className="flex-1 space-y-2.5">
               <div className="h-3 w-24 rounded-md bg-secondary-200" />
@@ -44,7 +44,7 @@ export default function HealthVitalsWidget({ vitals = [], loading, error, onRetr
   if (error) {
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="card p-6 col-span-full text-center">
+        <div className="bg-white rounded-lg border border-secondary-200 shadow-card p-6 col-span-full text-center">
           <p className="text-sm font-semibold text-red-600 mb-3">{error}</p>
           <Button variant="secondary" size="sm" onClick={onRetry}>
             Retry
@@ -57,7 +57,7 @@ export default function HealthVitalsWidget({ vitals = [], loading, error, onRetr
   if (!vitals || vitals.length === 0) {
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="card p-6 col-span-full text-center text-secondary-600">
+        <div className="bg-white rounded-lg border border-secondary-200 shadow-card p-6 col-span-full text-center text-secondary-600">
           No health data available.
         </div>
       </div>

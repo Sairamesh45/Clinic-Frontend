@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   Stethoscope, 
@@ -262,7 +262,7 @@ export default function BookPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="glass-panel p-6 rounded-2xl">
+      <div className="bg-white/95 backdrop-blur-sm border border-secondary-200 shadow-card rounded-lg p-6">
         <div className="relative">
           <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
           <input
@@ -336,7 +336,7 @@ export default function BookPage() {
       {/* Map or Search Results */}
       {viewMode === 'search' && searchQuery ? (
         // Search Results
-        <div className="glass-panel p-6 rounded-2xl">
+        <div className="bg-white/95 backdrop-blur-sm border border-secondary-200 shadow-card rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-slate-800">
               Search Results for "{searchQuery}"
@@ -398,7 +398,7 @@ export default function BookPage() {
         </div>
       ) : (
         // Map View
-        <div className="glass-panel p-6 rounded-2xl">
+        <div className="bg-white/95 backdrop-blur-sm border border-secondary-200 shadow-card rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-slate-800">
               {userLocation ? 'Nearby Clinics' : 'Clinics Map'}
@@ -430,7 +430,7 @@ export default function BookPage() {
 
       {/* Clinic Selection Form - Only show when clinic is selected */}
       {selectedClinic && (
-        <form onSubmit={handleSubmit} className="glass-panel p-8 rounded-3xl space-y-6 relative overflow-hidden">
+        <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-sm border border-secondary-200 shadow-card rounded-lg p-8 space-y-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 pointer-events-none" />
 
           <h3 className="text-2xl font-bold text-slate-800 mb-6">

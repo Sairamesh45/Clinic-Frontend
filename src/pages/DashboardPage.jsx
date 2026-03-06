@@ -72,7 +72,7 @@ export default function DashboardPage() {
             markAllLoading={markAllLoading}
           />
 
-          <div className="gradient-primary text-white rounded-xl p-6 shadow-elevated relative overflow-hidden">
+          <div className="bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-xl p-6 shadow-elevated relative overflow-hidden">
             {/* Decorative background circle */}
             <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-white/10 blur-3xl"></div>
 

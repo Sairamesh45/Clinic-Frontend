@@ -19,7 +19,7 @@ export default function UpcomingAppointmentsWidget({
 
   if (error && !loading) {
     return (
-      <div className="card p-6 text-center">
+      <div className="bg-white rounded-lg border border-secondary-200 shadow-card p-6 text-center">
         <p className="text-sm font-semibold text-red-600 mb-3">{error}</p>
         <Button variant="secondary" size="sm" onClick={onRetry}>
           Retry
@@ -41,7 +41,7 @@ export default function UpcomingAppointmentsWidget({
           {skeletonCards.map((_, idx) => (
             <div
               key={`apt-skeleton-${idx}`}
-              className="card p-5 flex flex-col gap-6 animate-pulse"
+              className="bg-white rounded-lg border border-secondary-200 shadow-card p-5 flex flex-col gap-6 animate-pulse"
             >
               <div className="h-20 w-full rounded-lg bg-secondary-200" />
               <div className="space-y-3">
@@ -70,7 +70,7 @@ export default function UpcomingAppointmentsWidget({
             <div
               key={apt.id}
               onClick={() => navigate('/queue')}
-              className="card p-5 flex flex-col sm:flex-row gap-6 card-interactive"
+              className="bg-white rounded-lg border border-secondary-200 shadow-card p-5 flex flex-col sm:flex-row gap-6 transition-all duration-300 hover:shadow-card-hover cursor-pointer hover:border-secondary-300"
             >
               <div className="flex flex-col items-center justify-center rounded-lg bg-primary-50 p-4 min-w-[110px] border border-primary-200">
                 <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">

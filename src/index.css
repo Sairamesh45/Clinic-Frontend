@@ -50,31 +50,8 @@ body {
   @apply bg-secondary-500;
 }
 
-/* Layout Utilities */
-.glass-panel {
-  @apply bg-white/95 backdrop-blur-sm border border-secondary-200 shadow-card rounded-lg;
-}
-
-.card {
-  @apply bg-surface rounded-lg border border-secondary-200 shadow-card;
-}
-
-.card-hover {
-  @apply transition-all duration-300 hover:shadow-card-hover;
-}
-
-.card-interactive {
-  @apply card-hover cursor-pointer hover:border-secondary-300;
-}
-
-/* Gradient utilities */
-.gradient-primary {
-  @apply bg-gradient-to-br from-primary-600 to-primary-700;
-}
-
-.gradient-accent {
-  @apply bg-gradient-to-br from-accent-500 to-accent-600;
-}
+/* Layout Utilities - using inline Tailwind classes instead */
+/* These are now defined as inline classes in JSX components */
 
 /* Leaflet Map Styles */
 .leaflet-container {
