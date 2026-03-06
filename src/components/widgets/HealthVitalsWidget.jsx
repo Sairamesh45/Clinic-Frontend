@@ -6,7 +6,7 @@ export default function HealthVitalsWidget({ vitals = [], loading, error, onRetr
   const renderCard = (stat, idx) => (
     <div
       key={stat?.id || `${stat?.label}-${idx}`}
-      className="bg-white rounded-lg border border-secondary-200 shadow-card p-6 flex items-center gap-4 transition-all duration-300 hover:shadow-card-hover"
+      className="bg-white rounded-lg border border-secondary-200 shadow-card p-6 flex items-center gap-4 transition-shadow duration-300 hover:shadow-lg"
     >
       <div className={`h-14 w-14 rounded-lg flex items-center justify-center flex-shrink-0 ${stat?.bg || 'bg-secondary-100'}`}>
         {stat?.icon ? <stat.icon className={`h-6 w-6 ${stat?.color || 'text-secondary-600'}`} /> : null}

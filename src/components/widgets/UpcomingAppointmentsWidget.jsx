@@ -70,7 +70,7 @@ export default function UpcomingAppointmentsWidget({
             <div
               key={apt.id}
               onClick={() => navigate('/queue')}
-              className="bg-white rounded-lg border border-secondary-200 shadow-card p-5 flex flex-col sm:flex-row gap-6 transition-all duration-300 hover:shadow-card-hover cursor-pointer hover:border-secondary-300"
+              className="bg-white rounded-lg border border-secondary-200 shadow-card p-5 flex flex-col sm:flex-row gap-6 transition-shadow duration-300 hover:shadow-lg cursor-pointer hover:border-secondary-300"
             >
               <div className="flex flex-col items-center justify-center rounded-lg bg-primary-50 p-4 min-w-[110px] border border-primary-200">
                 <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">
