@@ -15,6 +15,9 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
+  Upload,
+  FlaskConical,
+  ListOrdered,
 } from 'lucide-react'
 import { useAiSummary } from '../hooks/useAiSummary'
 import { useAuth } from '../hooks/useAuth'
@@ -45,22 +48,18 @@ function formatMs(ms) {
 
 function StatCard({ icon: Icon, label, value, color = 'text-primary', bg = 'bg-primary/10' }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white/80 px-4 py-3 shadow-card backdrop-blur-sm">
-      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${bg}`}>
-        <Icon className={`h-4 w-4 ${color}`} />
+    <div className="glass-panel flex items-center gap-3 rounded-2xl px-4 py-4">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bg}`}>
+        <Icon className={`h-4.5 w-4.5 ${color}`} />
       </span>
       <div className="min-w-0">
         <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-400">
           {label}
         </p>
-        <p className="truncate text-sm font-semibold text-slate-700">{value}</p>
+        <p className="truncate text-sm font-bold text-slate-700">{value}</p>
       </div>
     </div>
   )
-}
-
-function SkeletonBlock({ className = '', style }) {
-  return <div className={`animate-pulse rounded-xl bg-slate-100 ${className}`} style={style} />
 }
 
 function SummarySkeleton() {
@@ -68,12 +67,16 @@ function SummarySkeleton() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <SkeletonBlock key={i} className="h-16 rounded-2xl" />
+          <div key={i} className="h-[66px] animate-pulse rounded-2xl bg-slate-100" />
         ))}
       </div>
-      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-card space-y-3">
+      <div className="space-y-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-5">
         {[100, 95, 88, 100, 92, 75, 85, 60].map((w, i) => (
-          <SkeletonBlock key={i} className="h-4" style={{ width: `${w}%` }} />
+          <div
+            key={i}
+            className="h-4 animate-pulse rounded-full bg-slate-200"
+            style={{ width: `${w}%` }}
+          />
         ))}
       </div>
     </div>
@@ -82,7 +85,7 @@ function SummarySkeleton() {
 
 function SummaryError({ message, onRetry }) {
   return (
-    <div className="flex items-start gap-4 rounded-3xl border border-red-100 bg-red-50 p-6">
+    <div className="flex items-start gap-4 rounded-2xl border border-red-100 bg-red-50 p-5">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100">
         <AlertCircle className="h-5 w-5 text-red-500" />
       </div>
@@ -90,11 +93,42 @@ function SummaryError({ message, onRetry }) {
         <p className="font-semibold text-red-700">Summary Unavailable</p>
         <p className="mt-0.5 text-sm text-red-500">{message}</p>
         {onRetry && (
-          <button onClick={onRetry} className="mt-2 text-xs font-semibold text-red-600 hover:underline">
+          <button
+            onClick={onRetry}
+            className="mt-2 text-xs font-semibold text-red-600 hover:underline"
+          >
             Try again
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+function CollapsiblePanel({ icon: Icon, iconBg, iconColor, title, subtitle, borderColor = 'border-slate-100', children, open, onToggle }) {
+  return (
+    <div className={`glass-panel overflow-hidden rounded-2xl border ${borderColor}`}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-primary/[0.03]"
+      >
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
+          <Icon className={`h-5 w-5 ${iconColor}`} />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-800">{title}</p>
+          <p className="text-xs text-slate-500">{subtitle}</p>
+        </div>
+        {open
+          ? <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" />
+          : <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />}
+      </button>
+      {open && (
+        <div className="border-t border-slate-100 px-6 pb-6 pt-5">
+          {children}
+        </div>
+      )}
     </div>
   )
 }
@@ -110,7 +144,6 @@ export default function AiSummaryPage() {
   const [timelineKey, setTimelineKey] = useState(0)
   const isDoctor = role === 'doctor'
 
-  // Called after a new event is saved — refresh timeline + regenerate summary
   const handleEventSaved = () => {
     setShowForm(false)
     setTimelineKey((k) => k + 1)
@@ -123,82 +156,108 @@ export default function AiSummaryPage() {
     refetch(true)
   }
 
-  // Bottom grid shows once summary has resolved at least once; stays visible during regeneration
   const summaryResolved = data !== null || (!loading && error !== null) || processing
 
   return (
     <div className="space-y-6">
 
-      {/* ═══════════════════════════════════════════════════════════════
-           TOP SECTION — Dashboard header + AI Summary
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-card">
+      {/* ── Hero Header ──────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden rounded-3xl px-8 py-9 md:px-10"
+        style={{ background: 'linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 45%, #d1fae5 100%)' }}
+      >
+        {/* Decorative blobs */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-sky-200/50 blur-3xl" />
+          <div className="absolute top-1/2 -left-12 h-56 w-56 rounded-full bg-teal-200/40 blur-3xl" />
+          <div className="absolute -bottom-14 right-1/3 h-48 w-48 rounded-full bg-blue-100/60 blur-2xl" />
+          <svg className="absolute inset-0 h-full w-full opacity-[0.07]" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="ai-dots" width="28" height="28" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1.5" fill="#0284c7" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#ai-dots)" />
+          </svg>
+        </div>
 
-        {/* Subtle gradient backdrop */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-accent/[0.03]" />
-        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-
-        <div className="relative p-6 sm:p-8">
-
-          {/* ── Header row ── */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white shadow-glow">
-                <Brain className="h-7 w-7" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary/50">
-                  AI-Powered · Clinical Dashboard
-                </p>
-                <h1 className="font-heading text-2xl font-bold text-slate-800 leading-tight">
-                  Patient Summary
-                </h1>
-                <p className="mt-0.5 font-mono text-xs text-slate-400">
-                  {id}
-                </p>
-              </div>
+        <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          {/* Title */}
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-lg shadow-primary/25"
+              style={{ background: 'linear-gradient(145deg, #0284c7, #0369a1)' }}>
+              <Brain className="h-7 w-7 text-white" />
             </div>
-
-            <div className="flex items-center gap-2 self-start">
-              {data && !loading && (
-                <span className="flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-600">
-                  <Activity className="h-3 w-3" />
-                  Live
-                </span>
-              )}
-              {loading && data && (
-                <span className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-[11px] font-semibold text-primary">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Regenerating…
-                </span>
-              )}
-              {/* Show button whenever we have had data at least once */}
-              {(data || (!loading && error)) && (
-                <Button variant="secondary" onClick={() => refetch(true)} disabled={loading}>
-                  {loading
-                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    : <RefreshCw className="h-3.5 w-3.5" />}
-                  {loading ? 'Regenerating…' : 'Regenerate'}
-                </Button>
-              )}
-              <Button variant="secondary" onClick={() => setShowUpload((v) => !v)} className="ml-2">
-                Upload Document
-              </Button>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary/60">
+                AI-Powered · Clinical Dashboard
+              </p>
+              <h1 className="font-heading text-2xl font-bold leading-tight text-slate-900">
+                Patient Summary
+              </h1>
+              <p className="mt-0.5 font-mono text-xs text-slate-400">{id}</p>
             </div>
           </div>
 
-          {/* ── Divider ── */}
-          <div className="my-6 border-t border-slate-100" />
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-2 self-start">
+            {data && !loading && (
+              <span className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-emerald-600 backdrop-blur-sm">
+                <Activity className="h-3 w-3" />
+                Live
+              </span>
+            )}
+            {loading && data && (
+              <span className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-primary backdrop-blur-sm">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Regenerating…
+              </span>
+            )}
+            {(data || (!loading && error)) && (
+              <Button variant="secondary" onClick={() => refetch(true)} disabled={loading}>
+                {loading
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <RefreshCw className="h-3.5 w-3.5" />}
+                {loading ? 'Regenerating…' : 'Regenerate'}
+              </Button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowUpload((v) => !v)}
+              className="flex items-center gap-2 rounded-xl border border-white/80 bg-white/70 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+            >
+              <Upload className="h-4 w-4 text-slate-500" />
+              Upload Document
+            </button>
+          </div>
+        </div>
+      </div>
 
-          {/* ── Summary body ── */}
+      {/* ── AI Summary Card ───────────────────────────────────────────── */}
+      <div className="glass-panel overflow-hidden rounded-2xl">
+        <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+            <Sparkles className="h-4 w-4 text-primary" />
+          </div>
+          <h2 className="font-heading text-lg font-bold text-slate-800">AI Summary</h2>
+          {data && !loading && (
+            <span className="ml-auto text-[11px] font-medium text-slate-400">
+              {formatDate(data.generated_at)}
+            </span>
+          )}
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Loading — no data yet */}
           {loading && !data && !processing && <SummarySkeleton />}
 
+          {/* Processing documents */}
           {processing && (
-            <div className="flex items-start gap-4 rounded-3xl border border-primary/20 bg-primary/5 p-6">
+            <div className="flex items-start gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-5">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
               </div>
-              <div className="flex-1">
+              <div>
                 <p className="font-semibold text-primary">Processing Documents</p>
                 <p className="mt-0.5 text-sm text-primary/70">
                   Your uploaded documents are being analyzed (OCR + AI extraction). This usually takes 30–60 seconds.
@@ -208,41 +267,19 @@ export default function AiSummaryPage() {
             </div>
           )}
 
+          {/* Error — no data */}
           {!loading && error && !data && !processing && (
             <SummaryError message={error} onRetry={() => refetch(false)} />
           )}
 
           {data && (
-            <div className="space-y-5">
-
-              {/* Stats row */}
+            <>
+              {/* Stats */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard
-                  icon={Hash}
-                  label="Word Count"
-                  value={data.word_count?.toLocaleString() ?? '—'}
-                />
-                <StatCard
-                  icon={FileText}
-                  label="Events Analysed"
-                  value={data.event_count?.toLocaleString() ?? '—'}
-                  color="text-accent"
-                  bg="bg-accent/10"
-                />
-                <StatCard
-                  icon={Cpu}
-                  label="Model"
-                  value={data.model ?? '—'}
-                  color="text-violet-600"
-                  bg="bg-violet-50"
-                />
-                <StatCard
-                  icon={Clock}
-                  label="Generated In"
-                  value={formatMs(data.total_duration_ms) ?? '—'}
-                  color="text-amber-600"
-                  bg="bg-amber-50"
-                />
+                <StatCard icon={Hash} label="Words" value={data.word_count?.toLocaleString() ?? '—'} />
+                <StatCard icon={FileText} label="Events" value={data.event_count?.toLocaleString() ?? '—'} color="text-accent" bg="bg-accent/10" />
+                <StatCard icon={Cpu} label="Model" value={data.model ?? '—'} color="text-violet-600" bg="bg-violet-50" />
+                <StatCard icon={Clock} label="Generated In" value={formatMs(data.total_duration_ms) ?? '—'} color="text-amber-600" bg="bg-amber-50" />
               </div>
 
               {/* Cache notice */}
@@ -252,17 +289,15 @@ export default function AiSummaryPage() {
                   <span>
                     Served from cache&nbsp;·&nbsp;
                     <span className="font-medium">may be up to 24 h old.</span>
-                    &nbsp;Click <strong>Regenerate</strong> to force a fresh summary.
+                    &nbsp;Click <strong>Regenerate</strong> for a fresh summary.
                   </span>
                 </div>
               )}
 
               {/* Narrative */}
               <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/60 p-5">
-
-                {/* Regenerating overlay — shown while a refresh is in flight */}
                 {loading && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/75 backdrop-blur-[3px]">
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/80 backdrop-blur-[3px]">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
                       <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </div>
@@ -270,125 +305,94 @@ export default function AiSummaryPage() {
                   </div>
                 )}
 
-                {/* Card header */}
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    </span>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                      Physician Narrative
-                    </p>
-                  </div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                    Physician Narrative
+                  </p>
                   <button
                     onClick={() => refetch(true)}
                     disabled={loading}
-                    title="Regenerate summary"
                     className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {loading
-                      ? <Loader2 className="h-3 w-3 animate-spin" />
-                      : <RefreshCw className="h-3 w-3" />}
-                    Regenerate Summary
+                    {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                    Regenerate
                   </button>
                 </div>
 
-                {/* Summary text */}
                 <p className={`text-[0.95rem] leading-[1.9] text-slate-700 transition-opacity duration-300 ${loading ? 'opacity-30 select-none' : 'opacity-100'}`}>
                   {data.summary}
                 </p>
               </div>
-
-              {/* Footer meta */}
-              <p className="flex items-center gap-1.5 text-xs text-slate-400">
-                <Clock className="h-3.5 w-3.5" />
-                {loading ? 'Regenerating…' : <>Generated&nbsp;<span className="font-medium text-slate-500">{formatDate(data.generated_at)}</span></>}
-              </p>
-
-            </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════
-           ADD CLINICAL EVENT — doctors only
-      ═══════════════════════════════════════════════════════════════ */}
+      {/* ── Action Panels ────────────────────────────────────────────── */}
       {isDoctor && (
-        <div className="overflow-hidden rounded-3xl border border-primary/15 bg-white shadow-card">
-          {/* Toggle header */}
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className="flex w-full items-center gap-3 px-6 py-4 text-left transition hover:bg-primary/[0.03]"
-          >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-              <Plus className="h-4 w-4 text-primary" />
-            </span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-neutral-dark">Add Clinical Entry</p>
-              <p className="text-xs text-neutral-dark/50">Record a prescription, diagnosis, lab result, or other event</p>
-            </div>
-            {showForm
-              ? <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" />
-              : <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />}
-          </button>
-
-          {/* Form */}
-          {showForm && (
-            <div className="border-t border-slate-100 px-6 pb-6 pt-5">
-              <AddEventForm patientId={id} onSuccess={handleEventSaved} />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Upload document (any authenticated user) */}
-      <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-card">
-        <button
-          onClick={() => setShowUpload((v) => !v)}
-          className="flex w-full items-center gap-3 px-6 py-4 text-left transition hover:bg-primary/[0.03]"
+        <CollapsiblePanel
+          icon={Plus}
+          iconBg="bg-primary/10"
+          iconColor="text-primary"
+          title="Add Clinical Entry"
+          subtitle="Record a prescription, diagnosis, lab result, or other event"
+          borderColor="border-primary/15"
+          open={showForm}
+          onToggle={() => setShowForm((v) => !v)}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-            <FileText className="h-4 w-4 text-primary" />
-          </span>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-neutral-dark">Upload Document</p>
-            <p className="text-xs text-neutral-dark/50">Upload a PDF medical document for this patient</p>
-          </div>
-          {showUpload ? <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" /> : <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />}
-        </button>
-
-        {showUpload && (
-          <div className="border-t border-slate-100 px-6 pb-6 pt-5">
-            <UploadDocumentForm patientId={id} onSuccess={handleUploadSuccess} />
-          </div>
-        )}
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-           LAB REPORT — Full lab results with flags
-      ═══════════════════════════════════════════════════════════════ */}
-      {summaryResolved && (
-        <LabReport patientId={id} refreshKey={timelineKey} />
+          <AddEventForm patientId={id} onSuccess={handleEventSaved} />
+        </CollapsiblePanel>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════
-           BOTTOM GRID — Timeline (left) | Lab Chart (right)
-      ═══════════════════════════════════════════════════════════════ */}
+      <CollapsiblePanel
+        icon={Upload}
+        iconBg="bg-sky-50"
+        iconColor="text-primary"
+        title="Upload Document"
+        subtitle="Upload a PDF medical document for this patient"
+        open={showUpload}
+        onToggle={() => setShowUpload((v) => !v)}
+      >
+        <UploadDocumentForm patientId={id} onSuccess={handleUploadSuccess} />
+      </CollapsiblePanel>
+
+      {/* ── Lab Report ───────────────────────────────────────────────── */}
+      {summaryResolved && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50">
+              <FlaskConical className="h-4 w-4 text-amber-600" />
+            </div>
+            <h2 className="font-heading text-xl font-bold text-slate-800">Lab Report</h2>
+          </div>
+          <LabReport patientId={id} refreshKey={timelineKey} />
+        </section>
+      )}
+
+      {/* ── Timeline + Chart Grid ─────────────────────────────────────── */}
       {summaryResolved && (
         <div className="grid gap-6 lg:grid-cols-5">
-
-          {/* Timeline — wider column */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-50">
+                <ListOrdered className="h-4 w-4 text-violet-600" />
+              </div>
+              <h2 className="font-heading text-xl font-bold text-slate-800">Clinical Timeline</h2>
+            </div>
             <PatientTimeline patientId={id} refreshKey={timelineKey} />
           </div>
 
-          {/* Lab Chart — narrower column, sticky on large screens */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/10">
+                <Activity className="h-4 w-4 text-accent" />
+              </div>
+              <h2 className="font-heading text-xl font-bold text-slate-800">Lab Trends</h2>
+            </div>
             <div className="lg:sticky lg:top-6">
               <LabTrendsChart patientId={id} />
             </div>
           </div>
-
         </div>
       )}
 

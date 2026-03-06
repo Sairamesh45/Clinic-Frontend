@@ -6,35 +6,34 @@ export default function HealthVitalsWidget({ vitals = [], loading, error, onRetr
   const renderCard = (stat, idx) => (
     <div
       key={stat?.id || `${stat?.label}-${idx}`}
-      className="glass-panel p-6 rounded-2xl flex items-center gap-4 hover:shadow-lg transition-shadow"
+      className="glass-panel group rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover"
     >
-      <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${stat?.bg || 'bg-slate-100'}`}>
-        {stat?.icon ? <stat.icon className={`h-6 w-6 ${stat?.color || 'text-slate-600'}`} /> : null}
-      </div>
-      <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{stat?.label}</p>
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-slate-800">{stat?.value}</span>
-          {stat?.status && (
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${stat?.bg || ''} ${stat?.color || ''}`}>
-              {stat.status}
-            </span>
-          )}
+      <div className="flex items-start justify-between">
+        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${stat?.bg || 'bg-slate-100'}`}>
+          {stat?.icon ? <stat.icon className={`h-5 w-5 ${stat?.color || 'text-slate-600'}`} /> : null}
         </div>
+        {stat?.status && (
+          <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${stat?.bg || 'bg-slate-100'} ${stat?.color || 'text-slate-600'}`}>
+            {stat.status}
+          </span>
+        )}
+      </div>
+      <div className="mt-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{stat?.label}</p>
+        <p className="mt-1 text-2xl font-bold text-slate-800">{stat?.value}</p>
       </div>
     </div>
   )
 
   if (loading) {
     return (
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {skeletonSlots.map((_, idx) => (
-          <div key={`vital-skel-${idx}`} className="glass-panel p-6 rounded-2xl flex items-center gap-4 animate-pulse">
-            <div className="h-12 w-12 rounded-xl bg-slate-200" />
-            <div className="flex-1 space-y-3">
+          <div key={`vital-skel-${idx}`} className="glass-panel animate-pulse rounded-2xl p-5">
+            <div className="h-11 w-11 rounded-xl bg-slate-200" />
+            <div className="mt-4 space-y-2">
               <div className="h-3 w-2/5 rounded-full bg-slate-200" />
-              <div className="h-5 w-1/3 rounded-full bg-slate-200" />
-              <div className="h-3 w-1/4 rounded-full bg-slate-200" />
+              <div className="h-6 w-1/3 rounded-full bg-slate-200" />
             </div>
           </div>
         ))}
@@ -44,26 +43,20 @@ export default function HealthVitalsWidget({ vitals = [], loading, error, onRetr
 
   if (error) {
     return (
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="glass-panel p-6 rounded-2xl col-span-full text-center text-slate-500">
-          <p className="text-sm font-semibold text-red-500">{error}</p>
-          <Button variant="ghost" className="mt-3" onClick={onRetry}>
-            Retry
-          </Button>
-        </div>
+      <div className="glass-panel rounded-2xl p-6 text-center">
+        <p className="text-sm font-semibold text-red-500">{error}</p>
+        <Button variant="ghost" className="mt-3" onClick={onRetry}>Retry</Button>
       </div>
     )
   }
 
   if (!vitals || vitals.length === 0) {
     return (
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="glass-panel p-6 rounded-2xl col-span-full text-center text-slate-500">
-          No health data available.
-        </div>
+      <div className="glass-panel rounded-2xl p-8 text-center text-slate-400">
+        <p className="text-sm font-medium">No health vitals on record yet.</p>
       </div>
     )
   }
 
-  return <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{vitals.map(renderCard)}</div>
+  return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{vitals.map(renderCard)}</div>
 }

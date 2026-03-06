@@ -17,13 +17,27 @@ export default function UpcomingAppointmentsWidget({
   const handleViewAll = onViewAll || (() => {})
   const handleBookNow = onBookNow || handleViewAll
 
+  const Header = () => (
+    <div className="flex items-center justify-between">
+      <h2 className="font-heading text-xl font-bold text-slate-800">Upcoming Appointments</h2>
+      <button
+        type="button"
+        onClick={handleViewAll}
+        className="text-sm font-semibold text-primary transition-colors hover:text-primary-dark"
+      >
+        View All
+      </button>
+    </div>
+  )
+
   if (error && !loading) {
     return (
-      <div className="glass-panel p-6 rounded-2xl text-center text-slate-500">
-        <p className="text-sm font-semibold text-red-500">{error}</p>
-        <Button variant="ghost" className="mt-3" onClick={onRetry}>
-          Retry
-        </Button>
+      <div className="space-y-4">
+        <Header />
+        <div className="glass-panel rounded-2xl p-6 text-center">
+          <p className="text-sm font-semibold text-red-500">{error}</p>
+          <Button variant="ghost" className="mt-3" onClick={onRetry}>Retry</Button>
+        </div>
       </div>
     )
   }
@@ -31,25 +45,19 @@ export default function UpcomingAppointmentsWidget({
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-800">Upcoming Appointments</h2>
-          <Button variant="ghost" className="text-primary hover:bg-primary/5" onClick={handleViewAll}>
-            View All
-          </Button>
-        </div>
+        <Header />
         <div className="space-y-4">
           {skeletonCards.map((_, idx) => (
             <div
               key={`apt-skeleton-${idx}`}
-              className="glass-panel p-5 rounded-2xl flex flex-col gap-6 animate-pulse"
+              className="glass-panel animate-pulse rounded-2xl p-5"
             >
-              <div className="h-24 w-full rounded-2xl bg-slate-200" />
-              <div className="space-y-3">
-                <div className="h-4 w-1/3 rounded-full bg-slate-200" />
-                <div className="h-3 w-1/2 rounded-full bg-slate-200" />
-                <div className="flex items-center gap-3 text-sm text-slate-400">
-                  <div className="h-3 w-10 rounded-full bg-slate-200" />
-                  <div className="h-3 w-16 rounded-full bg-slate-200" />
+              <div className="flex gap-5">
+                <div className="h-20 w-20 shrink-0 rounded-xl bg-slate-200" />
+                <div className="flex-1 space-y-3 pt-1">
+                  <div className="h-4 w-2/5 rounded-full bg-slate-200" />
+                  <div className="h-3 w-1/3 rounded-full bg-slate-200" />
+                  <div className="h-3 w-1/2 rounded-full bg-slate-200" />
                 </div>
               </div>
             </div>
@@ -61,65 +69,60 @@ export default function UpcomingAppointmentsWidget({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-800">Upcoming Appointments</h2>
-        <Button variant="ghost" className="text-primary hover:bg-primary/5" onClick={handleViewAll}>
-          View All
-        </Button>
-      </div>
-
+      <Header />
       <div className="space-y-4">
         {appointments && appointments.length > 0 ? (
           appointments.map((apt) => (
             <div
               key={apt.id}
               onClick={() => navigate('/queue')}
-              className="glass-panel p-5 rounded-2xl flex flex-col sm:flex-row gap-6 hover:border-primary/20 transition-colors group cursor-pointer"
+              className="glass-panel group cursor-pointer rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-card-hover"
             >
-              <div className="flex flex-col items-center justify-center rounded-xl bg-slate-50 p-4 min-w-[100px] border border-slate-100 group-hover:border-primary/10 group-hover:bg-primary/5 transition-colors">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  {new Date(apt.date).toLocaleString('default', { month: 'short' })}
-                </span>
-                <span className="text-2xl font-bold text-primary">{new Date(apt.date).getDate()}</span>
-                <span className="text-xs font-semibold text-slate-500">{apt.time}</span>
-              </div>
-
-              <div className="flex-1 flex flex-col justify-center gap-1">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-800">{apt.doctor}</h3>
-                    <p className="text-sm text-slate-500 font-medium">{apt.speciality}</p>
-                  </div>
-                  <StatusBadge status={apt.status} />
+              <div className="flex flex-col gap-5 sm:flex-row">
+                {/* Date block */}
+                <div className="flex flex-col items-center justify-center rounded-xl border border-slate-100 bg-slate-50 p-4 transition-colors group-hover:border-primary/15 group-hover:bg-primary/5 sm:min-w-[90px]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    {new Date(apt.date).toLocaleString('default', { month: 'short' })}
+                  </span>
+                  <span className="text-2xl font-bold text-primary">{new Date(apt.date).getDate()}</span>
+                  <span className="mt-0.5 text-xs font-semibold text-slate-500">{apt.time}</span>
                 </div>
 
-                {/* Token Number Display */}
-                {apt.tokenNumber && (
-                  <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-primary">
-                    <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full">
-                      <Hash className="h-4 w-4" />
-                      <span>Token: {apt.tokenNumber}</span>
+                {/* Details */}
+                <div className="flex flex-1 flex-col justify-center gap-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-bold text-slate-800">{apt.doctor}</h3>
+                      <p className="text-sm font-medium text-slate-500">{apt.speciality}</p>
                     </div>
+                    <StatusBadge status={apt.status} />
                   </div>
-                )}
 
-                <div className="mt-4 flex items-center gap-4 text-sm text-slate-500">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4 text-slate-400" />
-                    {apt.location}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4 text-slate-400" />
-                    45 mins
+                  {apt.tokenNumber && (
+                    <div className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                      <Hash className="h-3.5 w-3.5" />
+                      Token: {apt.tokenNumber}
+                    </div>
+                  )}
+
+                  <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                      {apt.location}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-slate-400" />
+                      45 mins
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            <Calendar className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">No upcoming appointments</p>
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 py-14 text-center">
+            <Calendar className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+            <p className="font-medium text-slate-500">No upcoming appointments</p>
             <Button variant="link" onClick={handleBookNow} className="mt-2 text-primary">
               Schedule one now
             </Button>
