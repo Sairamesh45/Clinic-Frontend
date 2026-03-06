@@ -1,14 +1,16 @@
 const BUTTON_VARIANTS = {
   primary:
-    'bg-primary text-white shadow-soft hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary',
+    'bg-primary-600 text-white shadow-card hover:bg-primary-700 hover:shadow-card-hover active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary-500',
   secondary:
-    'bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-slate-400',
+    'bg-surface text-secondary-700 border border-secondary-200 shadow-card hover:bg-secondary-50 hover:border-secondary-300 active:bg-secondary-100 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-secondary-400',
+  accent:
+    'bg-accent-500 text-white shadow-card hover:bg-accent-600 hover:shadow-card-hover active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-accent-400',
   ghost:
-    'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 outline-none focus-visible:ring-2 focus-visible:ring-slate-400 rounded-lg',
-  link:
-    'bg-transparent text-primary hover:text-primary-dark underline-offset-4 hover:underline padding-0 h-auto shadow-none',
+    'bg-transparent text-secondary-600 hover:bg-secondary-100 hover:text-secondary-900 active:bg-secondary-200 outline-none focus-visible:ring-2 focus-visible:ring-secondary-400',
   danger:
-    'bg-red-500 text-white shadow-soft hover:bg-red-600 hover:shadow-red-500/30 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-red-500',
+    'bg-red-500 text-white shadow-card hover:bg-red-600 hover:shadow-card-hover active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-red-500',
+  link:
+    'bg-transparent text-primary-600 hover:text-primary-700 underline-offset-4 hover:underline p-0 h-auto shadow-none',
 }
 
 export default function Button({ variant = 'primary', className = '', children, ...props }) {
@@ -17,7 +19,7 @@ export default function Button({ variant = 'primary', className = '', children, 
   return (
     <button
       type={props.type ?? 'button'}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none ${variantClasses} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none ${variantClasses} ${className}`}
       {...props}
     >
       {children}

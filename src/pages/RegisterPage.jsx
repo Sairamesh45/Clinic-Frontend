@@ -62,25 +62,25 @@ export default function RegisterPage() {
   }
 
   const inputClass =
-    'w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-neutral-dark placeholder:text-neutral-dark/30 transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10'
+    'w-full rounded-lg border border-secondary-200 bg-secondary-50 py-3 pl-10 pr-4 text-sm text-secondary-900 placeholder:text-secondary-500 transition focus:border-primary-500 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary-100'
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-secondary-50">
       {/* ─── Left branding panel ─── */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between bg-primary p-12 text-white">
+      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between bg-gradient-to-br from-primary-700 via-primary-600 to-primary-800 p-12 text-white">
           <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
-            <HeartPulse className="h-5 w-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/15 backdrop-blur-md text-white">
+            <HeartPulse className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold tracking-wide">{APP_NAME}</span>
+          <span className="text-lg font-bold tracking-tight">{APP_NAME}</span>
         </div>
 
         <div className="space-y-8">
           <div>
-            <h2 className="text-4xl font-bold leading-tight tracking-tight">
+            <h2 className="text-5xl font-bold leading-tight">
               Join {APP_NAME} today.
             </h2>
-            <p className="mt-4 text-white/60 text-base leading-relaxed">
+            <p className="mt-4 text-primary-100/80 text-base leading-relaxed">
               Create your account and start managing your healthcare journey with ease.
             </p>
           </div>
@@ -88,32 +88,32 @@ export default function RegisterPage() {
           <div className="space-y-3">
             {FEATURES.map((feature) => (
               <div key={feature} className="flex items-center gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-white/15">
                   <CheckCircle2 className="h-3.5 w-3.5 text-white" />
                 </div>
-                <span className="text-white/80 text-sm">{feature}</span>
+                <span className="text-primary-100 text-sm">{feature}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-white/30 text-xs">© {COPYRIGHT_YEAR} {COPYRIGHT_OWNER}. All rights reserved.</p>
+        <p className="text-white/50 text-xs">© {COPYRIGHT_YEAR} {COPYRIGHT_OWNER}. All rights reserved.</p>
       </div>
 
       {/* ─── Right form panel ─── */}
       <div className="flex flex-1 flex-col items-center justify-center p-8 overflow-y-auto">
         {/* Mobile logo */}
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-            <HeartPulse className="h-5 w-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-white">
+            <HeartPulse className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold text-neutral-dark">{APP_NAME}</span>
+          <span className="text-lg font-bold text-secondary-900">{APP_NAME}</span>
         </div>
 
         <div className="w-full max-w-md">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-neutral-dark">Create an account</h1>
-            <p className="mt-1 text-sm text-neutral-dark/50">Fill in the details below to get started</p>
+            <h1 className="text-3xl font-heading font-bold text-secondary-900">Create an account</h1>
+            <p className="mt-1 text-sm text-secondary-600">Fill in the details below to get started</p>
           </div>
 
           {success ? (

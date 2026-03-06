@@ -2,31 +2,31 @@ import { Clock, MapPin, Stethoscope, CheckCircle2, Circle, AlertCircle } from 'l
 
 const STATUS_CONFIG = {
   booked: {
-    classes: 'bg-sky-100 text-sky-700',
+    classes: 'bg-primary-50 text-primary-700 border border-primary-200',
     icon: Clock,
   },
   pending: {
-    classes: 'bg-amber-100 text-amber-700',
+    classes: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
     icon: Clock,
   },
   arrived: {
-    classes: 'bg-indigo-100 text-indigo-700',
+    classes: 'bg-blue-50 text-blue-700 border border-blue-200',
     icon: MapPin,
   },
   'in-consultation': {
-    classes: 'bg-violet-100 text-violet-700',
+    classes: 'bg-purple-50 text-purple-700 border border-purple-200',
     icon: Stethoscope,
   },
   completed: {
-    classes: 'bg-emerald-100 text-emerald-700',
+    classes: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     icon: CheckCircle2,
   },
   cancelled: {
-    classes: 'bg-red-100 text-red-700',
+    classes: 'bg-red-50 text-red-700 border border-red-200',
     icon: AlertCircle,
   },
   default: {
-    classes: 'bg-slate-100 text-slate-600',
+    classes: 'bg-secondary-100 text-secondary-700 border border-secondary-200',
     icon: Circle,
   },
 }
@@ -44,8 +44,8 @@ export default function StatusBadge({ status = 'UNKNOWN' }) {
   const Icon = config.icon
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${config.classes}`}>
-      <Icon className="h-3 w-3" />
+    <span className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide ${config.classes}`}>
+      <Icon className="h-3.5 w-3.5" />
       {normalized.replace(/-/g, ' ')}
     </span>
   )

@@ -19,9 +19,9 @@ export default function UpcomingAppointmentsWidget({
 
   if (error && !loading) {
     return (
-      <div className="glass-panel p-6 rounded-2xl text-center text-slate-500">
-        <p className="text-sm font-semibold text-red-500">{error}</p>
-        <Button variant="ghost" className="mt-3" onClick={onRetry}>
+      <div className="card p-6 text-center">
+        <p className="text-sm font-semibold text-red-600 mb-3">{error}</p>
+        <Button variant="secondary" size="sm" onClick={onRetry}>
           Retry
         </Button>
       </div>
@@ -32,8 +32,8 @@ export default function UpcomingAppointmentsWidget({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-800">Upcoming Appointments</h2>
-          <Button variant="ghost" className="text-primary hover:bg-primary/5" onClick={handleViewAll}>
+          <h2 className="text-xl font-heading font-semibold text-secondary-900">Upcoming Appointments</h2>
+          <Button variant="link" onClick={handleViewAll}>
             View All
           </Button>
         </div>
@@ -41,16 +41,12 @@ export default function UpcomingAppointmentsWidget({
           {skeletonCards.map((_, idx) => (
             <div
               key={`apt-skeleton-${idx}`}
-              className="glass-panel p-5 rounded-2xl flex flex-col gap-6 animate-pulse"
+              className="card p-5 flex flex-col gap-6 animate-pulse"
             >
-              <div className="h-24 w-full rounded-2xl bg-slate-200" />
+              <div className="h-20 w-full rounded-lg bg-secondary-200" />
               <div className="space-y-3">
-                <div className="h-4 w-1/3 rounded-full bg-slate-200" />
-                <div className="h-3 w-1/2 rounded-full bg-slate-200" />
-                <div className="flex items-center gap-3 text-sm text-slate-400">
-                  <div className="h-3 w-10 rounded-full bg-slate-200" />
-                  <div className="h-3 w-16 rounded-full bg-slate-200" />
-                </div>
+                <div className="h-4 w-32 rounded-md bg-secondary-200" />
+                <div className="h-3 w-48 rounded-md bg-secondary-200" />
               </div>
             </div>
           ))}
@@ -62,8 +58,8 @@ export default function UpcomingAppointmentsWidget({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-800">Upcoming Appointments</h2>
-        <Button variant="ghost" className="text-primary hover:bg-primary/5" onClick={handleViewAll}>
+        <h2 className="text-xl font-heading font-semibold text-secondary-900">Upcoming Appointments</h2>
+        <Button variant="link" onClick={handleViewAll}>
           View All
         </Button>
       </div>
@@ -74,53 +70,53 @@ export default function UpcomingAppointmentsWidget({
             <div
               key={apt.id}
               onClick={() => navigate('/queue')}
-              className="glass-panel p-5 rounded-2xl flex flex-col sm:flex-row gap-6 hover:border-primary/20 transition-colors group cursor-pointer"
+              className="card p-5 flex flex-col sm:flex-row gap-6 card-interactive"
             >
-              <div className="flex flex-col items-center justify-center rounded-xl bg-slate-50 p-4 min-w-[100px] border border-slate-100 group-hover:border-primary/10 group-hover:bg-primary/5 transition-colors">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <div className="flex flex-col items-center justify-center rounded-lg bg-primary-50 p-4 min-w-[110px] border border-primary-200">
+                <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">
                   {new Date(apt.date).toLocaleString('default', { month: 'short' })}
                 </span>
-                <span className="text-2xl font-bold text-primary">{new Date(apt.date).getDate()}</span>
-                <span className="text-xs font-semibold text-slate-500">{apt.time}</span>
+                <span className="text-3xl font-bold text-primary-600 leading-none">{new Date(apt.date).getDate()}</span>
+                <span className="text-xs font-semibold text-primary-700 mt-1">{apt.time}</span>
               </div>
 
-              <div className="flex-1 flex flex-col justify-center gap-1">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-800">{apt.doctor}</h3>
-                    <p className="text-sm text-slate-500 font-medium">{apt.speciality}</p>
+              <div className="flex-1 flex flex-col justify-center gap-2">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-secondary-900">{apt.doctor}</h3>
+                    <p className="text-sm text-secondary-600 font-medium">{apt.speciality}</p>
                   </div>
                   <StatusBadge status={apt.status} />
                 </div>
 
                 {/* Token Number Display */}
                 {apt.tokenNumber && (
-                  <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-primary">
-                    <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full">
-                      <Hash className="h-4 w-4" />
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 bg-primary-50 px-2.5 py-1 rounded-md border border-primary-200 text-sm font-semibold text-primary-700">
+                      <Hash className="h-3.5 w-3.5" />
                       <span>Token: {apt.tokenNumber}</span>
                     </div>
                   </div>
                 )}
 
-                <div className="mt-4 flex items-center gap-4 text-sm text-slate-500">
+                <div className="mt-3 flex items-center gap-4 text-sm text-secondary-600">
                   <div className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4 text-slate-400" />
-                    {apt.location}
+                    <MapPin className="h-4 w-4 text-secondary-400 flex-shrink-0" />
+                    <span>{apt.location}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4 text-slate-400" />
-                    45 mins
+                    <Clock className="h-4 w-4 text-secondary-400 flex-shrink-0" />
+                    <span>45 mins</span>
                   </div>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            <Calendar className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">No upcoming appointments</p>
-            <Button variant="link" onClick={handleBookNow} className="mt-2 text-primary">
+          <div className="text-center py-12 rounded-lg border-2 border-dashed border-secondary-200 bg-secondary-50">
+            <Calendar className="h-10 w-10 text-secondary-300 mx-auto mb-3" />
+            <p className="text-secondary-700 font-medium mb-3">No upcoming appointments</p>
+            <Button variant="secondary" size="sm" onClick={handleBookNow}>
               Schedule one now
             </Button>
           </div>

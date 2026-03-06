@@ -1,18 +1,35 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @config "../tailwind.config.js";
 
 :root {
   --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --surface: #ffffff;
   --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --primary: #0284c7;
+  --accent: #14b8a6;
+  --border: #e2e8f0;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   @apply bg-background text-text-primary font-sans antialiased;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.03) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(20, 184, 166, 0.03) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.02) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(20, 184, 166, 0.02) 0px, transparent 50%);
   background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  @apply transition-colors duration-200;
 }
 
 /* Custom Scrollbar */
@@ -26,16 +43,37 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  @apply bg-secondary-300 rounded-full hover:bg-secondary-400 transition-colors;
+}
+
+::-webkit-scrollbar-thumb:active {
+  @apply bg-secondary-500;
 }
 
 /* Layout Utilities */
 .glass-panel {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-card;
+  @apply bg-white/95 backdrop-blur-sm border border-secondary-200 shadow-card rounded-lg;
+}
+
+.card {
+  @apply bg-surface rounded-lg border border-secondary-200 shadow-card;
 }
 
 .card-hover {
-  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover;
+  @apply transition-all duration-300 hover:shadow-card-hover;
+}
+
+.card-interactive {
+  @apply card-hover cursor-pointer hover:border-secondary-300;
+}
+
+/* Gradient utilities */
+.gradient-primary {
+  @apply bg-gradient-to-br from-primary-600 to-primary-700;
+}
+
+.gradient-accent {
+  @apply bg-gradient-to-br from-accent-500 to-accent-600;
 }
 
 /* Leaflet Map Styles */

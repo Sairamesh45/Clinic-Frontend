@@ -84,24 +84,24 @@ export default function MainLayout({ children }) {
 
       {/* Sidebar Navigation */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-white border-r border-slate-100 shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-surface border-r border-secondary-200 transition-transform duration-300 lg:static lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Logo Area */}
-        <div className="flex h-20 items-center gap-3 px-6 border-b border-slate-50">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-dark shadow-glow text-white">
-            <Activity className="h-6 w-6" />
+        <div className="flex h-20 items-center gap-3 px-6 border-b border-secondary-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 shadow-glow text-white flex-shrink-0">
+            <Activity className="h-5 w-5" />
           </div>
-          <div>
-            <h1 className="font-heading text-lg font-bold text-slate-800 leading-tight">{APP_NAME}</h1>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Clinic Portal</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-heading text-base font-bold text-secondary-900 leading-tight truncate">{APP_NAME}</h1>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-secondary-400">Clinic Portal</p>
           </div>
         </div>
 
         {/* Navigation Links */}
         <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
-          <p className="px-4 text-xs font-semibold uppercase text-slate-400 tracking-wider mb-4">Menu</p>
+          <p className="px-4 text-xs font-semibold uppercase text-secondary-400 tracking-wider mb-4">Menu</p>
           {visibleItems.map((item) => {
             const Icon = item.icon
 
@@ -116,11 +116,11 @@ export default function MainLayout({ children }) {
                   <div
                     key={item.path}
                     title="Navigate to a patient first"
-                    className="group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium cursor-not-allowed opacity-40 select-none text-slate-400"
+                    className="group flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium cursor-not-allowed opacity-50 select-none text-secondary-400"
                   >
-                    <Icon className="h-5 w-5 text-slate-300" />
+                    <Icon className="h-5 w-5 flex-shrink-0" />
                     {item.label}
-                    <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-slate-300 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                    <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide text-secondary-500 bg-secondary-100 px-2 py-1 rounded-full whitespace-nowrap">
                       No patient
                     </span>
                   </div>
@@ -132,17 +132,17 @@ export default function MainLayout({ children }) {
                   key={item.path}
                   to={resolvedPath}
                   className={({ isActive }) =>
-                    `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                    `group flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors duration-200 ${
                       isActive
-                        ? 'bg-primary/10 text-primary shadow-sm'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-primary-50 text-primary-600'
+                        : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                      {item.label}
+                      <Icon className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-primary-600' : 'text-secondary-400 group-hover:text-secondary-600'}`} />
+                      <span className="flex-1">{item.label}</span>
                     </>
                   )}
                 </NavLink>
@@ -154,17 +154,17 @@ export default function MainLayout({ children }) {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                  `group flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors duration-200 ${
                     isActive
-                      ? 'bg-primary/10 text-primary shadow-sm'
-                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-primary-50 text-primary-600'
+                      : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                    {item.label}
+                    <Icon className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-primary-600' : 'text-secondary-400 group-hover:text-secondary-600'}`} />
+                    <span className="flex-1">{item.label}</span>
                   </>
                 )}
               </NavLink>
@@ -173,23 +173,23 @@ export default function MainLayout({ children }) {
         </nav>
 
         {/* User Profile Footer */}
-        <div className="border-t border-slate-100 p-4">
+        <div className="border-t border-secondary-100 p-4 space-y-2">
           <button 
             onClick={logout}
-            className="flex w-full items-center justify-between rounded-xl p-3 hover:bg-red-50 group transition-colors"
+            className="flex w-full items-center justify-between rounded-lg p-3 hover:bg-red-50 group transition-colors"
           >
-             <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+             <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="h-9 w-9 rounded-full bg-secondary-100 flex items-center justify-center text-secondary-600 flex-shrink-0">
                   <User size={18} />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-700 group-hover:text-red-600">
+                <div className="text-left flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-secondary-900 group-hover:text-red-600 truncate">
                     {role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User'}
                   </p>
-                  <p className="text-xs text-slate-400">Sign out</p>
+                  <p className="text-xs text-secondary-500">Sign out</p>
                 </div>
              </div>
-             <LogOut className="h-4 w-4 text-slate-300 group-hover:text-red-400" />
+             <LogOut className="h-4 w-4 text-secondary-400 group-hover:text-red-500 flex-shrink-0 ml-2" />
           </button>
         </div>
       </aside>
@@ -197,35 +197,35 @@ export default function MainLayout({ children }) {
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="flex h-20 items-center justify-between bg-white/80 backdrop-blur px-6 lg:px-10 border-b border-slate-100/50 sticky top-0 z-10">
+        <header className="flex h-20 items-center justify-between bg-surface/95 backdrop-blur-sm px-6 lg:px-10 border-b border-secondary-200 sticky top-0 z-10">
           <div className="flex items-center gap-4">
              <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
+              className="rounded-md p-2 text-secondary-600 hover:bg-secondary-100 transition-colors lg:hidden"
             >
               <Menu className="h-6 w-6" />
             </button>
              {/* Title or Breadcrumb (optional) */}
-             <h2 className="text-xl font-heading font-bold text-slate-800 hidden md:block">
+             <h2 className="text-xl font-heading font-semibold text-secondary-900 hidden md:block">
                {activeSection || 'Dashboard'}
              </h2>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
              {/* Search Bar (Visual Only) */}
-             <div className="hidden md:flex items-center gap-2 bg-slate-50 px-4 py-2.5 rounded-full border border-slate-100 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all w-64">
-                <Search className="h-4 w-4 text-slate-400" />
+             <div className="hidden md:flex items-center gap-2 bg-secondary-50 px-4 py-2.5 rounded-lg border border-secondary-200 hover:border-secondary-300 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 transition-all w-64">
+                <Search className="h-4 w-4 text-secondary-400" />
                 <input 
                   type="text" 
                   placeholder="Search..." 
-                  className="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400 text-slate-600"
+                  className="bg-transparent border-none outline-none text-sm w-full placeholder:text-secondary-400 text-secondary-700 font-medium"
                 />
              </div>
 
              {/* Notifications */}
-             <button className="relative rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+             <button className="relative rounded-lg p-2.5 text-secondary-500 hover:bg-secondary-100 hover:text-secondary-700 transition-colors">
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
              </button>
              
              {/* Mobile Profile Trigger (optional if needed) */}
@@ -233,7 +233,7 @@ export default function MainLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-10">
+        <main className="flex-1 overflow-y-auto bg-secondary-50 px-4 py-6 lg:px-10 lg:py-8">
            <div className="mx-auto max-w-7xl animate-fade-in">
              {children}
            </div>

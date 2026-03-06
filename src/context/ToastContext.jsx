@@ -31,45 +31,45 @@ export function ToastStack() {
 
   const variants = {
     success: {
-      wrapper: 'border-green-100 bg-white text-green-900 shadow-green-100/50',
+      wrapper: 'border-emerald-200 bg-emerald-50 text-emerald-900 shadow-card',
       icon: CheckCircle2,
-      iconClass: 'text-green-500',
-      dot: 'bg-green-500',
+      iconClass: 'text-emerald-600',
+      dot: 'bg-emerald-600',
     },
     error: {
-      wrapper: 'border-red-100 bg-white text-red-900 shadow-red-100/50',
+      wrapper: 'border-red-200 bg-red-50 text-red-900 shadow-card',
       icon: XCircle,
-      iconClass: 'text-red-500',
-      dot: 'bg-red-500',
+      iconClass: 'text-red-600',
+      dot: 'bg-red-600',
     },
     info: {
-      wrapper: 'border-slate-200 bg-white text-slate-900 shadow-slate-100/50',
+      wrapper: 'border-secondary-200 bg-secondary-50 text-secondary-900 shadow-card',
       icon: Info,
-      iconClass: 'text-primary',
-      dot: 'bg-primary',
+      iconClass: 'text-primary-600',
+      dot: 'bg-primary-600',
     },
   }
 
   if (!messages.length) return null
 
   return (
-    <div className="pointer-events-none fixed right-4 top-4 z-50 flex flex-col gap-2 w-80">
+    <div className="pointer-events-none fixed right-4 top-4 z-50 flex flex-col gap-3 w-96">
       {messages.map((toast) => {
         const v = variants[toast.type] ?? variants.info
         const Icon = v.icon
         return (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-sm shadow-lg ${v.wrapper}`}
+            className={`pointer-events-auto flex items-start gap-3 rounded-lg border px-4 py-3.5 text-sm font-medium animate-slide-up ${v.wrapper}`}
           >
-            <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${v.iconClass}`} />
+            <Icon className={`mt-0.5 h-5 w-5 flex-shrink-0 ${v.iconClass}`} />
             <p className="flex-1 leading-relaxed">{toast.message}</p>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-1 rounded-lg p-0.5 text-current opacity-40 transition hover:opacity-70"
+              className="ml-1 rounded-md p-0.5 text-current opacity-50 transition hover:opacity-75"
               aria-label="Dismiss"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         )
