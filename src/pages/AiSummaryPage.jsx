@@ -22,7 +22,6 @@ import {
 import { useAiSummary } from '../hooks/useAiSummary'
 import { useAuth } from '../hooks/useAuth'
 import PatientTimeline from '../components/PatientTimeline'
-import LabTrendsChart from '../components/LabTrendsChart'
 import LabReport from '../components/LabReport'
 import AddEventForm from '../components/AddEventForm'
 import UploadDocumentForm from '../components/UploadDocumentForm'
@@ -307,7 +306,7 @@ export default function AiSummaryPage() {
 
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                    Physician Narrative
+                    Clinical Summary
                   </p>
                   <button
                     onClick={() => refetch(true)}
@@ -319,9 +318,29 @@ export default function AiSummaryPage() {
                   </button>
                 </div>
 
-                <p className={`text-[0.95rem] leading-[1.9] text-slate-700 transition-opacity duration-300 ${loading ? 'opacity-30 select-none' : 'opacity-100'}`}>
-                  {data.summary}
-                </p>
+                {(() => {
+                  const points =
+                    data.summary_points?.length > 0
+                      ? data.summary_points
+                      : (data.summary ?? '')
+                          .split('\n')
+                          .map((l) => l.replace(/^[•\-*]\s*/, '').trim())
+                          .filter(Boolean)
+                  return (
+                    <ul
+                      className={`space-y-2.5 transition-opacity duration-300 ${
+                        loading ? 'opacity-30 select-none' : 'opacity-100'
+                      }`}
+                    >
+                      {points.map((point, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <span className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-primary/70" />
+                          <span className="text-[0.95rem] leading-[1.75] text-slate-700">{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                })()}
               </div>
             </>
           )}
@@ -369,31 +388,17 @@ export default function AiSummaryPage() {
         </section>
       )}
 
-      {/* ── Timeline + Chart Grid ─────────────────────────────────────── */}
+      {/* ── Clinical Timeline ──────────────────────────────────────── */}
       {summaryResolved && (
-        <div className="grid gap-6 lg:grid-cols-5">
-          <div className="lg:col-span-3 space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-50">
-                <ListOrdered className="h-4 w-4 text-violet-600" />
-              </div>
-              <h2 className="font-heading text-xl font-bold text-slate-800">Clinical Timeline</h2>
+        <section className="space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-50">
+              <ListOrdered className="h-4 w-4 text-violet-600" />
             </div>
-            <PatientTimeline patientId={id} refreshKey={timelineKey} />
+            <h2 className="font-heading text-xl font-bold text-slate-800">Clinical Timeline</h2>
           </div>
-
-          <div className="lg:col-span-2 space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/10">
-                <Activity className="h-4 w-4 text-accent" />
-              </div>
-              <h2 className="font-heading text-xl font-bold text-slate-800">Lab Trends</h2>
-            </div>
-            <div className="lg:sticky lg:top-6">
-              <LabTrendsChart patientId={id} />
-            </div>
-          </div>
-        </div>
+          <PatientTimeline patientId={id} refreshKey={timelineKey} />
+        </section>
       )}
 
     </div>

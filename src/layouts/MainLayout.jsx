@@ -71,37 +71,37 @@ export default function MainLayout({ children }) {
   const visibleItems = navItems.filter((item) => item.roles.includes(role))
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background font-sans text-text-primary">
+    <div className="flex h-screen overflow-hidden bg-[#f4f6fa] font-sans text-text-primary">
       <ToastStack />
       
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 z-20 bg-black/50 transition-opacity lg:hidden"
+          className="fixed inset-0 z-20 bg-black/40 transition-opacity lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar Navigation */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-white border-r border-slate-100 shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-white shadow-[4px_0_24px_rgba(0,0,0,0.06)] transition-transform duration-300 lg:static lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Logo Area */}
-        <div className="flex h-20 items-center gap-3 px-6 border-b border-slate-50">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-dark shadow-glow text-white">
-            <Activity className="h-6 w-6" />
+        <div className="flex h-16 items-center gap-3 px-6">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white shadow-md shadow-primary/20">
+            <Activity className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-heading text-lg font-bold text-slate-800 leading-tight">{APP_NAME}</h1>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Clinic Portal</p>
+            <h1 className="font-heading text-base font-bold text-slate-800 leading-tight">{APP_NAME}</h1>
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Clinic Portal</p>
           </div>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
-          <p className="px-4 text-xs font-semibold uppercase text-slate-400 tracking-wider mb-4">Menu</p>
+        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-0.5">
+          <p className="px-4 text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-3">Navigation</p>
           {visibleItems.map((item) => {
             const Icon = item.icon
 
@@ -134,14 +134,14 @@ export default function MainLayout({ children }) {
                   className={({ isActive }) =>
                     `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? 'bg-primary/10 text-primary shadow-sm'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-primary text-white shadow-md shadow-primary/20'
+                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                      <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                       {item.label}
                     </>
                   )}
@@ -156,14 +156,14 @@ export default function MainLayout({ children }) {
                 className={({ isActive }) =>
                   `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-primary/10 text-primary shadow-sm'
-                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-primary text-white shadow-md shadow-primary/20'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                    <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                     {item.label}
                   </>
                 )}
@@ -173,10 +173,10 @@ export default function MainLayout({ children }) {
         </nav>
 
         {/* User Profile Footer */}
-        <div className="border-t border-slate-100 p-4">
+        <div className="p-4">
           <button 
             onClick={logout}
-            className="flex w-full items-center justify-between rounded-xl p-3 hover:bg-red-50 group transition-colors"
+            className="flex w-full items-center justify-between rounded-xl p-3 hover:bg-red-50/10 group transition-colors"
           >
              <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
@@ -197,7 +197,7 @@ export default function MainLayout({ children }) {
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="flex h-20 items-center justify-between bg-white/80 backdrop-blur px-6 lg:px-10 border-b border-slate-100/50 sticky top-0 z-10">
+          <header className="flex h-16 items-center justify-between bg-white/90 backdrop-blur-md px-6 lg:px-10 shadow-[0_1px_8px_rgba(0,0,0,0.06)] sticky top-0 z-10">
           <div className="flex items-center gap-4">
              <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -206,15 +206,15 @@ export default function MainLayout({ children }) {
               <Menu className="h-6 w-6" />
             </button>
              {/* Title or Breadcrumb (optional) */}
-             <h2 className="text-xl font-heading font-bold text-slate-800 hidden md:block">
+             <h2 className="text-xl font-heading font-bold text-text-primary hidden md:block">
                {activeSection || 'Dashboard'}
              </h2>
           </div>
 
           <div className="flex items-center gap-4">
              {/* Search Bar (Visual Only) */}
-             <div className="hidden md:flex items-center gap-2 bg-slate-50 px-4 py-2.5 rounded-full border border-slate-100 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all w-64">
-                <Search className="h-4 w-4 text-slate-400" />
+             <div className="hidden md:flex items-center gap-2 bg-[#f4f6fa] px-4 py-2 rounded-xl border-0 focus-within:ring-2 focus-within:ring-primary/20 transition-all w-60">
+                <Search className="h-4 w-4 text-slate-400 shrink-0" />
                 <input 
                   type="text" 
                   placeholder="Search..." 
@@ -223,9 +223,9 @@ export default function MainLayout({ children }) {
              </div>
 
              {/* Notifications */}
-             <button className="relative rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+             <button className="relative rounded-xl p-2.5 text-slate-500 hover:bg-[#f4f6fa] transition-colors">
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
              </button>
              
              {/* Mobile Profile Trigger (optional if needed) */}
@@ -233,8 +233,8 @@ export default function MainLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-10">
-           <div className="mx-auto max-w-7xl animate-fade-in">
+          <main className="flex-1 overflow-y-auto p-6 lg:p-10">
+            <div className="mx-auto max-w-7xl animate-fade-in">
              {children}
            </div>
         </main>

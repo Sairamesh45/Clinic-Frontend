@@ -8,7 +8,7 @@ const PRESETS = ['HbA1c', 'Glucose', 'Creatinine', 'Hemoglobin', 'WBC', 'Cholest
 
 // ── Flag styling ──────────────────────────────────────────────────────────────
 
-const FLAG_STYLE = {
+export const FLAG_STYLE = {
   HIGH:     { fill: '#ef4444', stroke: '#dc2626', label: 'bg-red-50 text-red-600 border-red-100' },
   LOW:      { fill: '#3b82f6', stroke: '#2563eb', label: 'bg-sky-50 text-sky-600 border-sky-100' },
   CRITICAL: { fill: '#7f1d1d', stroke: '#991b1b', label: 'bg-red-100 text-red-800 border-red-200' },
@@ -16,7 +16,7 @@ const FLAG_STYLE = {
 }
 const DOT_DEFAULT = { fill: '#0284c7', stroke: '#0369a1' }
 
-function getDotStyle(flag) {
+export function getDotStyle(flag) {
   return FLAG_STYLE[flag?.toUpperCase()] ?? DOT_DEFAULT
 }
 
@@ -31,13 +31,13 @@ function parseRefRange(str) {
 
 // ── Date formatter ─────────────────────────────────────────────────────────────
 
-function shortDate(dateStr) {
+export function shortDate(dateStr) {
   if (!dateStr) return '?'
   const d = new Date(`${dateStr}T00:00:00`)
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d)
 }
 
-function fullDate(dateStr) {
+export function fullDate(dateStr) {
   if (!dateStr) return '—'
   return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(`${dateStr}T00:00:00`))
 }
@@ -56,7 +56,7 @@ function niceRange(min, max) {
   return { lo: min - pad, hi: max + pad }
 }
 
-function LabLineChart({ points, unit, refRange }) {
+export function LabLineChart({ points, unit, refRange }) {
   const [tooltip, setTooltip] = useState(null)
   const svgRef = useRef(null)
 

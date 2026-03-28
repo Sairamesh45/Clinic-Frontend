@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Pill,
+  FileText,
   Stethoscope,
   FlaskConical,
   HeartPulse,
@@ -245,24 +246,166 @@ function TimelineEvent({ event, isLast }) {
   )
 }
 
+// ── Prescription / Document group card ───────────────────────────────────────
+
+/**
+ * Groups all events sharing the same document_id into one card.
+ * Used for the 'medicines' and 'summary' views.
+ */
+function groupEventsByDocument(events) {
+  const groups = new Map()
+  for (const event of events) {
+    const key = event.document_id ?? '__manual__'
+    if (!groups.has(key)) {
+      groups.set(key, { document_id: event.document_id, events: [] })
+    }
+    groups.get(key).events.push(event)
+  }
+  return Array.from(groups.values())
+}
+
+function MedRow({ event }) {
+  const d = event.event_data || {}
+  const drug = d.name ?? d.drug ?? d.medication ?? '—'
+  const dosage = d.dosage ?? d.dose ?? null
+  const freq = d.frequency ?? null
+  const route = d.route ?? null
+  const duration = d.duration ?? null
+
+  return (
+    <div className="flex items-start gap-3 py-2.5 border-b border-slate-50 last:border-0">
+      <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-primary/60" />
+      <div className="min-w-0 flex-1 grid grid-cols-[1fr_auto] gap-x-3">
+        <span className="text-sm font-semibold text-slate-800 truncate">{drug}</span>
+        {dosage && (
+          <span className="text-xs font-medium text-slate-500 whitespace-nowrap">{dosage}</span>
+        )}
+        {(freq || route || duration) && (
+          <span className="col-span-2 text-[11px] text-slate-400 mt-0.5 leading-snug">
+            {[freq, route, duration].filter(Boolean).join(' · ')}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function SummaryEventRow({ event }) {
+  const cfg = getConfig(event.event_type)
+  const Icon = cfg.icon
+  const d = event.event_data || {}
+
+  const title =
+    d.name ?? d.diagnosis ?? d.condition ?? d.description ??
+    d.reason ?? d.procedure ?? d.vaccine ?? d.test_name ?? '—'
+
+  const sub =
+    d.severity ?? d.status ?? d.specialty ?? d.icd_code ?? d.outcome ?? null
+
+  return (
+    <div className="flex items-start gap-2.5 py-2 border-b border-slate-50 last:border-0">
+      <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${cfg.dot}`}>
+        <Icon className="h-2.5 w-2.5 text-white" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${cfg.badge}`}>
+            {cfg.label}
+          </span>
+          {event.event_date && (
+            <span className="text-[9px] text-slate-400">{formatEventDate(event.event_date)}</span>
+          )}
+        </div>
+        <p className="mt-0.5 text-[13px] font-medium text-slate-700 leading-snug truncate">{title}</p>
+        {sub && <p className="text-[10px] text-slate-400 leading-snug">{sub}</p>}
+      </div>
+    </div>
+  )
+}
+
+function PrescriptionCard({ group, isLast, view }) {
+  // Derive card date from the first event that has a date
+  const firstDate = group.events.find((e) => e.event_date)?.event_date ?? null
+  const docLabel = group.document_id
+    ? `Prescription · ${firstDate ? formatEventDate(firstDate) : 'Date unknown'}`
+    : `Manual entry · ${firstDate ? formatEventDate(firstDate) : 'Date unknown'}`
+
+  const isMeds = view === 'medicines'
+
+  return (
+    <div className="flex gap-4">
+      {/* Track + dot */}
+      <div className="flex flex-col items-center">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm ${isMeds ? 'bg-primary' : 'bg-violet-500'}`}>
+          {isMeds
+            ? <Pill className="h-4 w-4 text-white" />
+            : <FileText className="h-4 w-4 text-white" />}
+        </div>
+        {!isLast && (
+          <div className="mt-2 w-0.5 flex-1 rounded-full bg-slate-100 min-h-[1.5rem]" />
+        )}
+      </div>
+
+      {/* Card */}
+      <div className={`flex-1 ${isLast ? 'pb-0' : 'pb-6'}`}>
+        <div className="rounded-2xl border border-slate-100 bg-white shadow-card overflow-hidden">
+          {/* Card header */}
+          <div className={`flex items-center justify-between px-4 py-2.5 ${isMeds ? 'bg-primary/5 border-b border-primary/10' : 'bg-violet-50/60 border-b border-violet-100'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-widest ${isMeds ? 'text-primary' : 'text-violet-600'}`}>
+              {docLabel}
+            </span>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${isMeds ? 'bg-primary/10 text-primary' : 'bg-violet-100 text-violet-700'}`}>
+              {group.events.length} item{group.events.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* Rows */}
+          <div className="px-4">
+            {isMeds
+              ? group.events.map((e) => <MedRow key={e.id} event={e} />)
+              : group.events.map((e) => <SummaryEventRow key={e.id} event={e} />)
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function PatientTimeline({ patientId, refreshKey }) {
-  const { events, meta, loading, loadingMore, error, fetched, fetch, loadMore } =
-    usePatientTimeline(patientId)
+// ── View toggle config ───────────────────────────────────────────────────────
 
-  // Fetch on mount, and whenever patientId or refreshKey changes.
-  // refreshKey increment from parent triggers a full reset of the timeline
-  // (e.g. after a new event is saved via AddEventForm).
+const VIEW_OPTIONS = [
+  { key: null,        label: 'All' },
+  { key: 'summary',   label: 'Summary' },
+  { key: 'medicines', label: 'Medicines' },
+]
+
+const VIEW_EMPTY_MESSAGES = {
+  null:        'No clinical events recorded for this patient yet.',
+  summary:     'No diagnoses, notes, follow-ups, or procedures recorded yet.',
+  medicines:   'No medications recorded for this patient yet.',
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
+export default function PatientTimeline({ patientId, refreshKey }) {
+  const [view, setView] = useState(null)
+
+  const { events, meta, loading, loadingMore, error, fetched, fetch, loadMore } =
+    usePatientTimeline(patientId, view)
+
+  // Fetch on mount/patientId change/refreshKey change/view change
   useEffect(() => {
-    fetch(true)
+    fetch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientId, refreshKey])
+  }, [patientId, refreshKey, view])
 
   return (
     <div className="space-y-5">
       {/* Section Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100">
             <ListOrdered className="h-4 w-4 text-slate-500" />
@@ -277,22 +420,22 @@ export default function PatientTimeline({ patientId, refreshKey }) {
           </div>
         </div>
 
-        {/* Event-type count chips */}
-        {meta?.event_type_counts?.length > 0 && (
-          <div className="hidden flex-wrap justify-end gap-1.5 sm:flex">
-            {meta.event_type_counts.map(({ event_type, count }) => {
-              const cfg = getConfig(event_type)
-              return (
-                <span
-                  key={event_type}
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${cfg.badge}`}
-                >
-                  {cfg.label}&nbsp;·&nbsp;{count}
-                </span>
-              )
-            })}
-          </div>
-        )}
+        {/* View toggle */}
+        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
+          {VIEW_OPTIONS.map(({ key, label }) => (
+            <button
+              key={String(key)}
+              onClick={() => setView(key)}
+              className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+                view === key
+                  ? 'bg-white text-primary shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Loading skeletons */}
@@ -322,22 +465,41 @@ export default function PatientTimeline({ patientId, refreshKey }) {
       {!loading && fetched && !error && events.length === 0 && (
         <div className="rounded-2xl border border-slate-100 bg-slate-50 px-6 py-10 text-center">
           <ListOrdered className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-          <p className="text-sm text-slate-400">No clinical events recorded for this patient yet.</p>
+          <p className="text-sm text-slate-400">
+            {VIEW_EMPTY_MESSAGES[view] ?? VIEW_EMPTY_MESSAGES[null]}
+          </p>
         </div>
       )}
 
       {/* Timeline */}
       {!loading && events.length > 0 && (
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-card sm:p-6">
-          <div>
-            {events.map((event, i) => (
-              <TimelineEvent
-                key={event.id}
-                event={event}
-                isLast={i === events.length - 1 && !meta?.has_more}
-              />
-            ))}
-          </div>
+          {(() => {
+            const groups = (view === 'medicines' || view === 'summary')
+              ? groupEventsByDocument(events)
+              : null
+            return (
+              <div>
+                {groups
+                  ? groups.map((group, i) => (
+                      <PrescriptionCard
+                        key={group.document_id ?? `manual-${i}`}
+                        group={group}
+                        view={view}
+                        isLast={i === groups.length - 1 && !meta?.has_more}
+                      />
+                    ))
+                  : events.map((event, i) => (
+                      <TimelineEvent
+                        key={event.id}
+                        event={event}
+                        isLast={i === events.length - 1 && !meta?.has_more}
+                      />
+                    ))
+                }
+              </div>
+            )
+          })()}
 
           {/* Load More */}
           {meta?.has_more && (

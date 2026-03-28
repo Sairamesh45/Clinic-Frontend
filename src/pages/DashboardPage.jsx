@@ -1,5 +1,4 @@
 ﻿import { Activity, Bell, Calendar, ChevronRight, Clock, Sparkles, TrendingUp } from 'lucide-react'
-import Button from '../components/Button'
 import { useAppContext } from '../hooks/useAppContext'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
@@ -30,6 +29,7 @@ export default function DashboardPage() {
     errorStates = {},
     fetchAppointments,
     fetchVitals,
+    addVital,
     fetchNotifications,
     markNotificationRead,
     markAllNotificationsRead,
@@ -53,49 +53,40 @@ export default function DashboardPage() {
     <div className="space-y-8">
 
       {/* ── Hero Header ─────────────────────────────────── */}
-      <div
-        className="relative rounded-3xl overflow-hidden px-8 py-9 md:px-10 md:py-11"
-        style={{ background: 'linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 45%, #d1fae5 100%)' }}
+      <div className="relative rounded-2xl overflow-hidden px-8 py-10 md:px-12 md:py-12"
+        style={{ background: 'linear-gradient(135deg, #0b74ff 0%, #0546d0 60%, #14b8a6 100%)' }}
       >
-        {/* Decorative blobs — same palette as login page */}
+        {/* Subtle geometric shapes */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-sky-200/50 blur-3xl" />
-          <div className="absolute top-1/2 -left-12 h-56 w-56 rounded-full bg-teal-200/40 blur-3xl" />
-          <div className="absolute -bottom-14 right-1/3 h-48 w-48 rounded-full bg-blue-100/60 blur-2xl" />
-          <svg className="absolute inset-0 h-full w-full opacity-[0.07]" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="dash-dots" width="28" height="28" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="1.5" fill="#0284c7" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#dash-dots)" />
-          </svg>
+          <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-white/5" />
+          <div className="absolute top-1/2 right-12 h-32 w-32 rounded-full bg-white/5" />
+          <div className="absolute -bottom-10 left-1/3 h-40 w-40 rounded-full bg-white/5" />
         </div>
 
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1.5">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary/70">{dateStr}</p>
-            <h1 className="font-heading text-3xl font-bold text-slate-900 md:text-4xl">
-              {getGreeting(now.getHours())},{' '}
-              <span className="text-primary">{displayName}</span> 👋
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/60">{dateStr}</p>
+            <h1 className="font-heading text-3xl font-bold text-white md:text-4xl">
+              {getGreeting(now.getHours())}, <span className="text-white/90">{displayName}</span>
             </h1>
-            <p className="text-sm text-slate-500">Here's your health overview for today.</p>
+            <p className="text-sm text-white/70">Here's your health overview for today.</p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button
+            <button
+              type="button"
               onClick={() => navigate('/book')}
-              className="flex items-center gap-2 shadow-lg shadow-primary/20"
+              className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5"
             >
               <Calendar className="h-4 w-4" />
               Book Appointment
-            </Button>
+            </button>
             <button
               type="button"
               onClick={() => navigate('/queue')}
-              className="flex items-center gap-2 rounded-xl border border-white/80 bg-white/70 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+              className="flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
             >
-              <Clock className="h-4 w-4 text-slate-500" />
+              <Clock className="h-4 w-4" />
               Queue Status
             </button>
           </div>
@@ -109,37 +100,37 @@ export default function DashboardPage() {
             key={stat.label}
             type="button"
             onClick={stat.onClick}
-            className={`glass-panel flex items-center gap-4 rounded-2xl p-5 text-left transition-all duration-200 ${stat.onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover' : 'cursor-default'}`}
+            className={`bg-white rounded-2xl p-5 text-left shadow-sm transition-all duration-200 ${stat.onClick ? 'cursor-pointer hover:-translate-y-1 hover:shadow-md' : 'cursor-default'}`}
           >
-            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${stat.bg}`}>
+            <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${stat.bg}`}>
               <stat.icon className={`h-5 w-5 ${stat.color}`} />
             </div>
-            <div className="min-w-0">
-              <p className="text-xl font-bold text-slate-800">{stat.value}</p>
-              <p className="truncate text-xs font-medium text-slate-500">{stat.sub}</p>
-            </div>
+            <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
+            <p className="mt-0.5 text-xs font-medium text-slate-400">{stat.label}</p>
+            <p className="text-[11px] text-slate-400">{stat.sub}</p>
           </button>
         ))}
       </div>
 
       {/* ── Health Vitals ────────────────────────────────── */}
       <section className="space-y-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-            <TrendingUp className="h-4 w-4 text-primary" />
-          </div>
-          <h2 className="font-heading text-xl font-bold text-slate-800">Health Vitals</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-lg font-bold text-slate-800">Health Vitals</h2>
+          <span className="text-xs font-medium text-primary cursor-pointer hover:underline flex items-center gap-1">
+            <TrendingUp className="h-3.5 w-3.5" /> View trends
+          </span>
         </div>
         <HealthVitalsWidget
           vitals={healthVitals}
           loading={loadingStates.vitals}
           error={errorStates.vitals}
           onRetry={fetchVitals}
+          onAdd={addVital}
         />
       </section>
 
       {/* ── Main Grid ───────────────────────────────────── */}
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
 
         {/* Appointments */}
         <div className="lg:col-span-2">
@@ -153,18 +144,15 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
+        {/* Right column */}
+        <div className="space-y-5">
 
           {/* Notifications */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-50">
-                <Bell className="h-4 w-4 text-violet-600" />
-              </div>
-              <h2 className="font-heading text-xl font-bold text-slate-800">Notifications</h2>
+          <div className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-base font-bold text-slate-800">Notifications</h2>
               {unreadCount > 0 && (
-                <span className="ml-auto rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-bold text-violet-700">
+                <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-bold text-violet-700">
                   {unreadCount} new
                 </span>
               )}
@@ -181,27 +169,26 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Health Tip Card — gradient matching login left panel */}
+          {/* Health Tip Card */}
           <div
-            className="relative overflow-hidden rounded-2xl p-6 text-white shadow-lg"
-            style={{ background: 'linear-gradient(145deg, #0284c7 0%, #0369a1 55%, #14b8a6 100%)' }}
+            className="relative overflow-hidden rounded-2xl p-6 text-white shadow-md"
+            style={{ background: 'linear-gradient(145deg, #0b74ff 0%, #0546d0 60%, #14b8a6 100%)' }}
           >
-            <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-            <div className="pointer-events-none absolute -bottom-8 -left-6 h-24 w-24 rounded-full bg-white/10 blur-xl" />
+            <div className="pointer-events-none absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10" />
             <div className="relative z-10">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="rounded-xl bg-white/20 p-2 backdrop-blur-sm">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="rounded-lg bg-white/20 p-2">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
-                <h3 className="font-heading text-base font-bold">Health Tip</h3>
+                <h3 className="font-heading text-sm font-bold">Health Tip</h3>
               </div>
-              <p className="text-sm leading-relaxed text-white/90">
+              <p className="text-sm leading-relaxed text-white/85">
                 Regular check-ups detect health issues early, when they're most treatable. Don't wait — schedule your annual physical today.
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/book')}
-                className="mt-4 flex items-center gap-1 text-xs font-bold text-white/80 transition-colors hover:text-white"
+                className="mt-4 flex items-center gap-1 text-xs font-semibold text-white/80 transition-colors hover:text-white"
               >
                 Book a check-up <ChevronRight className="h-3.5 w-3.5" />
               </button>

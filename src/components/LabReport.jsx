@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import {
   FlaskConical,
   AlertTriangle,
@@ -11,8 +12,11 @@ import {
   Minus,
   FileText,
   RefreshCw,
+  X,
 } from 'lucide-react'
 import { useLabReport } from '../hooks/useLabReport'
+import { useLabTrends } from '../hooks/useLabTrends'
+import { LabLineChart, FLAG_STYLE as TREND_FLAG } from './LabTrendsChart'
 
 // ── Flag config ───────────────────────────────────────────────────────────────
 
@@ -138,57 +142,59 @@ function RangeBar({ value, refRange, flag }) {
 
 // ── Lab Result Card ───────────────────────────────────────────────────────────
 
-function LabResultCard({ item }) {
+function LabResultCard({ item, isSelected, onSelect }) {
   const f = getFlag(item.flag)
   const FlagIcon = f.icon
   const isAbnormal = item.flag && ['HIGH', 'LOW', 'CRITICAL'].includes(item.flag.toUpperCase())
 
   return (
     <div
+      onClick={() => onSelect(item.test_name)}
       className={`
-        group relative overflow-hidden rounded-2xl border p-4 transition-all duration-200
-        hover:shadow-md hover:-translate-y-0.5
+        group relative overflow-hidden rounded-xl border p-3 transition-all duration-200
+        cursor-pointer hover:shadow-md hover:-translate-y-0.5
+        ${isSelected ? 'ring-2 ring-primary/40 ring-offset-1' : ''}
         ${isAbnormal ? `${f.bg} ${f.border}` : 'bg-white border-slate-150 hover:border-slate-200'}
       `}
     >
       {/* Top row: test name + flag badge */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-slate-800 truncate">
+          <h4 className="text-[13px] font-semibold text-slate-800 truncate leading-snug">
             {item.test_name}
           </h4>
           {item.event_date && (
-            <p className="text-[10px] text-slate-400 mt-0.5">{shortDate(item.event_date)}</p>
+            <p className="text-[9px] text-slate-400 mt-0.5">{shortDate(item.event_date)}</p>
           )}
         </div>
         {item.flag && (
           <span
             className={`
-              inline-flex items-center gap-1 rounded-full border px-2 py-0.5
-              text-[10px] font-bold uppercase tracking-wide whitespace-nowrap
+              inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5
+              text-[9px] font-bold uppercase tracking-wide whitespace-nowrap
               ${f.badge}
             `}
           >
-            <FlagIcon className="h-3 w-3" />
+            <FlagIcon className="h-2.5 w-2.5" />
             {f.label}
           </span>
         )}
       </div>
 
       {/* Value */}
-      <div className="mt-3 flex items-baseline gap-1.5">
-        <span className={`text-2xl font-bold tabular-nums ${isAbnormal ? f.text : 'text-slate-800'}`}>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className={`text-xl font-bold tabular-nums leading-none ${isAbnormal ? f.text : 'text-slate-800'}`}>
           {item.value_raw || '—'}
         </span>
         {item.unit && (
-          <span className="text-xs font-medium text-slate-400">{item.unit}</span>
+          <span className="text-[10px] font-medium text-slate-400">{item.unit}</span>
         )}
       </div>
 
       {/* Reference range */}
       {item.reference_range && (
-        <div className="mt-1">
-          <p className="text-[10px] text-slate-400">
+        <div className="mt-1.5">
+          <p className="text-[9px] text-slate-400">
             Ref: <span className="font-medium text-slate-500">{item.reference_range}</span>
           </p>
           <RangeBar
@@ -202,9 +208,13 @@ function LabResultCard({ item }) {
       {/* Subtle corner accent for abnormal values */}
       {isAbnormal && (
         <div
-          className={`absolute -top-4 -right-4 h-12 w-12 rounded-full ${f.barColor} opacity-10`}
+          className={`absolute -top-4 -right-4 h-10 w-10 rounded-full ${f.barColor} opacity-10`}
         />
       )}
+      {/* Chart hint icon */}
+      <div className="absolute bottom-1.5 right-2">
+        <TrendingUp className={`h-3 w-3 transition-colors ${isSelected ? 'text-primary' : 'text-slate-200 group-hover:text-slate-400'}`} />
+      </div>
     </div>
   )
 }
@@ -241,10 +251,52 @@ function SummaryStats({ data }) {
   )
 }
 
+// ── Category Section ─────────────────────────────────────────────────────────
+
+function CategorySection({ group, selectedTest, onSelect }) {
+  return (
+    <div className="space-y-2.5">
+      {/* Category divider */}
+      <div className="flex items-center gap-2.5">
+        <div className="h-px flex-1 bg-slate-100" />
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            {group.category}
+          </span>
+          {group.abnormal_count > 0 && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+              {group.abnormal_count} abnormal
+            </span>
+          )}
+        </div>
+        <div className="h-px flex-1 bg-slate-100" />
+      </div>
+
+      {/* Cards grid */}
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {group.items.map((item) => (
+          <LabResultCard key={item.event_id} item={item} isSelected={selectedTest === item.test_name} onSelect={onSelect} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function LabReport({ patientId, refreshKey }) {
   const { data, loading, error, refetch } = useLabReport(patientId, refreshKey)
+  const [selectedTest, setSelectedTest] = useState(null)
+  const { data: trendData, loading: trendLoading, error: trendError, fetch: fetchTrend } = useLabTrends(patientId)
+
+  useEffect(() => {
+    if (selectedTest) fetchTrend(selectedTest)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTest])
+
+  function handleTestSelect(testName) {
+    setSelectedTest((prev) => (prev === testName ? null : testName))
+  }
 
   return (
     <div className="flex flex-col gap-4 rounded-3xl border border-slate-100 bg-white p-5 shadow-card sm:p-6">
@@ -343,20 +395,126 @@ export default function LabReport({ patientId, refreshKey }) {
           {/* Stats row */}
           <SummaryStats data={data} />
 
-          {/* Lab result cards grid */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            {/* Show abnormal results first, then normal */}
-            {[...data.items]
-              .sort((a, b) => {
-                const flagOrder = { CRITICAL: 0, HIGH: 1, LOW: 2, NORMAL: 3 }
-                const aOrder = flagOrder[a.flag?.toUpperCase()] ?? 3
-                const bOrder = flagOrder[b.flag?.toUpperCase()] ?? 3
-                return aOrder - bOrder
-              })
-              .map((item) => (
-                <LabResultCard key={item.event_id} item={item} />
+          {/* Lab result cards — grouped by category or flat fallback */}
+          {data.grouped_items?.length > 0 ? (
+            <div className="space-y-4">
+              {data.grouped_items.map((group) => (
+                <CategorySection key={group.category} group={group} selectedTest={selectedTest} onSelect={handleTestSelect} />
               ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Show abnormal results first, then normal */}
+              {[...data.items]
+                .sort((a, b) => {
+                  const flagOrder = { CRITICAL: 0, HIGH: 1, LOW: 2, NORMAL: 3 }
+                  const aOrder = flagOrder[a.flag?.toUpperCase()] ?? 3
+                  const bOrder = flagOrder[b.flag?.toUpperCase()] ?? 3
+                  return aOrder - bOrder
+                })
+                .map((item) => (
+                  <LabResultCard key={item.event_id} item={item} isSelected={selectedTest === item.test_name} onSelect={handleTestSelect} />
+                ))}
+            </div>
+          )}
+
+          {/* ── Trend Panel ───────────────────────────────────────────────────── */}
+          {selectedTest && (
+            <div className="border-t border-slate-100 pt-4">
+              <div className="rounded-2xl border border-primary/20 bg-white overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-primary/5 border-b border-primary/10">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <TrendingUp className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-sm font-bold text-primary">{selectedTest}</span>
+                    {!trendLoading && trendData?.common_unit && (
+                      <span className="text-xs text-slate-500">({trendData.common_unit})</span>
+                    )}
+                    {!trendLoading && trendData?.total != null && (
+                      <span className="text-xs text-slate-400">
+                        {trendData.total} reading{trendData.total !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setSelectedTest(null)}
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label="Close trend"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-4">
+                  {trendLoading && (
+                    <div className="flex h-40 items-center justify-center">
+                      <div className="h-8 w-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                    </div>
+                  )}
+                  {!trendLoading && trendError && (
+                    <p className="py-8 text-center text-sm text-red-500">{trendError}</p>
+                  )}
+                  {!trendLoading && !trendError && trendData?.total === 0 && (
+                    <div className="flex h-32 flex-col items-center justify-center gap-2 rounded-xl bg-slate-50">
+                      <FlaskConical className="h-6 w-6 text-slate-300" />
+                      <p className="text-xs text-slate-400">No trend data for &ldquo;{selectedTest}&rdquo;</p>
+                    </div>
+                  )}
+                  {!trendLoading && !trendError && trendData && trendData.total > 0 && (
+                    <div className="space-y-3">
+                      <LabLineChart
+                        points={trendData.points}
+                        unit={trendData.common_unit}
+                        refRange={trendData.points.find((p) => p.reference_range)?.reference_range}
+                      />
+                      <div className="overflow-hidden rounded-xl border border-slate-100">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="border-b border-slate-100 bg-slate-50">
+                              <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-slate-400">Date</th>
+                              <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wide text-slate-400">Value</th>
+                              <th className="px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">Flag</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {trendData.points.slice(-5).reverse().map((p, i) => {
+                              const flagCls = TREND_FLAG[p.flag?.toUpperCase()]?.label ?? ''
+                              const dateStr = p.event_date
+                                ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
+                                    new Date(`${p.event_date}T00:00:00`),
+                                  )
+                                : '—'
+                              return (
+                                <tr key={p.event_id ?? i} className="border-b border-slate-50 last:border-0">
+                                  <td className="px-3 py-2 text-slate-500">{dateStr}</td>
+                                  <td className="px-3 py-2 text-right font-semibold text-slate-700">
+                                    {p.value_raw}
+                                    {trendData.common_unit && (
+                                      <span className="ml-0.5 font-normal text-slate-400">{trendData.common_unit}</span>
+                                    )}
+                                  </td>
+                                  <td className="px-3 py-2 text-center">
+                                    {p.flag ? (
+                                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${flagCls}`}>
+                                        {p.flag}
+                                      </span>
+                                    ) : (
+                                      <span className="text-slate-300">—</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

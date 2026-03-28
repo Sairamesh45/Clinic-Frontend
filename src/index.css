@@ -1,18 +1,26 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @config "../tailwind.config.js";
 
 :root {
   --bg-primary: #f8fafc;
   --text-primary: #0f172a;
+  --color-primary: #0b74ff;
+  --color-primary-600: #0546d0;
+  --color-accent: #14b8a6;
+  --color-surface: #ffffff;
+  --hero-gradient-start: #f0f9ff;
+  --hero-gradient-mid: #e0f2fe;
+  --hero-gradient-end: #d1fae5;
+  --card-bg: rgba(255,255,255,0.8);
+}
+
+/* Utility for hero background used on landing/dashboard */
+.hero-bg {
+  background: linear-gradient(145deg, var(--hero-gradient-start) 0%, var(--hero-gradient-mid) 45%, var(--hero-gradient-end) 100%);
 }
 
 body {
-  @apply bg-background text-text-primary font-sans antialiased;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.03) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(20, 184, 166, 0.03) 0px, transparent 50%);
-  background-attachment: fixed;
+  @apply bg-[#f4f6fa] text-text-primary font-sans antialiased;
 }
 
 /* Custom Scrollbar */
@@ -31,7 +39,7 @@ body {
 
 /* Layout Utilities */
 .glass-panel {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-card;
+  @apply bg-white shadow-sm;
 }
 
 .card-hover {

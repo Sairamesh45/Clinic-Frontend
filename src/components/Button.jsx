@@ -1,10 +1,10 @@
 const BUTTON_VARIANTS = {
   primary:
-    'bg-primary text-white shadow-soft hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary',
+    'bg-primary text-white shadow-soft hover:shadow-card-hover hover:bg-primary-light hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary',
   secondary:
-    'bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-slate-400',
+    'bg-white text-secondary border border-secondary-light shadow-sm hover:bg-background hover:border-secondary active:bg-slate-100 active:scale-[0.98] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-secondary',
   ghost:
-    'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 outline-none focus-visible:ring-2 focus-visible:ring-slate-400 rounded-lg',
+    'bg-transparent text-secondary hover:bg-surface/50 hover:text-text-primary active:bg-surface/75 outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-lg',
   link:
     'bg-transparent text-primary hover:text-primary-dark underline-offset-4 hover:underline padding-0 h-auto shadow-none',
   danger:

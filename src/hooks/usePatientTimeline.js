@@ -7,8 +7,11 @@ const PAGE_SIZE = 20
 /**
  * Fetches the paginated clinical event timeline for a patient.
  * Endpoint: GET /api/v1/patients/{patientId}/timeline
+ *
+ * @param {string} patientId
+ * @param {string|null} view — 'medicines' | 'summary' | null (full timeline)
  */
-export function usePatientTimeline(patientId) {
+export function usePatientTimeline(patientId, view = null) {
   const [events, setEvents] = useState([])
   const [meta, setMeta] = useState(null)       // { total, has_more, event_type_counts }
   const [loading, setLoading] = useState(false)
@@ -30,9 +33,10 @@ export function usePatientTimeline(patientId) {
       setError(null)
 
       try {
-        const { data } = await aiClient.get(`/patients/${patientId}/timeline`, {
-          params: { limit: PAGE_SIZE, offset: nextOffset },
-        })
+        const params = { limit: PAGE_SIZE, offset: nextOffset }
+        if (view) params.view = view
+
+        const { data } = await aiClient.get(`/patients/${patientId}/timeline`, { params })
 
         setMeta({
           total: data.total,
@@ -61,7 +65,7 @@ export function usePatientTimeline(patientId) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [patientId, offset],
+    [patientId, offset, view],
   )
 
   const initialFetch = useCallback(() => fetch(true), [fetch])

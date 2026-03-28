@@ -95,7 +95,7 @@ export function AppProvider({ children }) {
     updateLoading('vitals', true)
     updateError('vitals', null)
     try {
-      const response = await axiosClient.get(`/patients/${patientId}/vitals`, { params: { limit: 6 } })
+      const response = await axiosClient.get(`/patients/${patientId}/vitals`, { params: { limit: 20 } })
       setHealthVitals(response.data?.data || response.data || [])
     } catch (err) {
       console.error('Failed to load vitals', err)
@@ -105,6 +105,14 @@ export function AppProvider({ children }) {
       updateLoading('vitals', false)
     }
   }, [patientId, role, token, updateError, updateLoading])
+
+  const addVital = useCallback(async (vitalData) => {
+    if (role !== 'patient' || !patientId || !token) return
+    const response = await axiosClient.post(`/patients/${patientId}/vitals`, vitalData)
+    const newVital = response.data?.data || response.data
+    setHealthVitals((prev) => [newVital, ...prev])
+    return newVital
+  }, [patientId, role, token])
 
   const fetchNotifications = useCallback(async () => {
     if (!token) {
@@ -185,6 +193,7 @@ export function AppProvider({ children }) {
       errorStates,
       fetchAppointments,
       fetchVitals,
+      addVital,
       fetchNotifications,
       markNotificationRead,
       markAllNotificationsRead,
@@ -193,6 +202,7 @@ export function AppProvider({ children }) {
     }),
     [
       activeSection,
+      addVital,
       appointments,
       errorStates,
       fetchAppointments,

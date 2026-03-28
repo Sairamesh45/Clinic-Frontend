@@ -2,31 +2,31 @@ import { Clock, MapPin, Stethoscope, CheckCircle2, Circle, AlertCircle } from 'l
 
 const STATUS_CONFIG = {
   booked: {
-    classes: 'bg-sky-100 text-sky-700',
+    classes: 'bg-status-booked/20 text-status-booked',
     icon: Clock,
   },
   pending: {
-    classes: 'bg-amber-100 text-amber-700',
+    classes: 'bg-status-arrived/20 text-status-arrived',
     icon: Clock,
   },
   arrived: {
-    classes: 'bg-indigo-100 text-indigo-700',
+    classes: 'bg-status-arrived/20 text-status-arrived',
     icon: MapPin,
   },
   'in-consultation': {
-    classes: 'bg-violet-100 text-violet-700',
+    classes: 'bg-status-in-consultation/20 text-status-in-consultation',
     icon: Stethoscope,
   },
   completed: {
-    classes: 'bg-emerald-100 text-emerald-700',
+    classes: 'bg-status-completed/20 text-status-completed',
     icon: CheckCircle2,
   },
   cancelled: {
-    classes: 'bg-red-100 text-red-700',
+    classes: 'bg-status-cancelled/20 text-status-cancelled',
     icon: AlertCircle,
   },
   default: {
-    classes: 'bg-slate-100 text-slate-600',
+    classes: 'bg-background text-text-secondary',
     icon: Circle,
   },
 }
