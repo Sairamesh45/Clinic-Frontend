@@ -13,6 +13,7 @@ import {
   Bell,
   Search,
   User,
+  Users,
   CalendarClock,
   Clock3,
 } from 'lucide-react'
@@ -28,8 +29,9 @@ const navItems = [
   { label: 'Queue Management', path: '/queue', roles: ['reception'], icon: ListOrdered },
   { label: 'Clinic Hours', path: '/settings/clinic-hours', roles: ['reception'], icon: CalendarClock },
   { label: 'Doctor Panel', path: '/doctor', roles: ['doctor'], icon: Stethoscope },
+  { label: 'Patients', path: '/patients', roles: ['doctor', 'reception'], icon: Users },
   { label: 'Availability', path: '/settings/doctor-availability', roles: ['doctor'], icon: Clock3 },
-  { label: 'AI Summary', path: '/patients', roles: ['patient', 'doctor', 'reception'], icon: Brain, dynamicPath: true },
+  { label: 'AI Summary', path: '/ai-summary', roles: ['patient', 'doctor', 'reception'], icon: Brain, dynamicPath: true },
 ]
 
 export default function MainLayout({ children }) {

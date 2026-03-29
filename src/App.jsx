@@ -10,10 +10,12 @@ import RegisterPage from './pages/RegisterPage'
 import BookPage from './pages/BookPage'
 import QueuePage from './pages/QueuePage'
 import DoctorPage from './pages/DoctorPage'
+import PatientsPage from './pages/PatientsPage'
 import ClinicDetailsPage from './pages/ClinicDetailsPage'
 import ClinicHoursSettingsPage from './pages/ClinicHoursSettingsPage'
 import DoctorAvailabilitySettingsPage from './pages/DoctorAvailabilitySettingsPage'
 import AiSummaryPage from './pages/AiSummaryPage'
+import ClinicBrowse from './components/ClinicBrowse'
 
 function AuthenticatedLayout({ allowedRoles }) {
   return (
@@ -38,6 +40,7 @@ function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/book" element={<BookPage />} />
                 <Route path="/clinic/:id" element={<ClinicDetailsPage />} />
+                <Route path="/browse-clinics" element={<ClinicBrowse />} />
               </Route>
               <Route element={<AuthenticatedLayout allowedRoles={['reception', 'patient']} />}>
                 <Route path="/queue" element={<QueuePage />} />
@@ -48,6 +51,9 @@ function App() {
               <Route element={<AuthenticatedLayout allowedRoles={['doctor']} />}>
                 <Route path="/settings/doctor-availability" element={<DoctorAvailabilitySettingsPage />} />
                 <Route path="/doctor" element={<DoctorPage />} />
+              </Route>
+              <Route element={<AuthenticatedLayout allowedRoles={['doctor', 'reception']} />}>
+                <Route path="/patients" element={<PatientsPage />} />
               </Route>
               <Route element={<AuthenticatedLayout allowedRoles={['patient', 'doctor', 'reception']} />}>
                 <Route path="/patients/:id/ai-summary" element={<AiSummaryPage />} />

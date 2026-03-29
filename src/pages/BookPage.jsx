@@ -41,6 +41,54 @@ const fmtTime = (value) => {
   return tIdx !== -1 ? str.slice(tIdx + 1, tIdx + 6) : str.slice(0, 5)
 }
 
+// Hardcoded clinic cards for sidebar
+const HARDCODED_CLINICS = [
+  {
+    id: 1,
+    name: 'City General Hospital',
+    distance: 1.2,
+    rating: 4.8,
+    waitTime: 15,
+    address: '123 Main St, Downtown',
+    latitude: 12.9165,
+    longitude: 79.1325,
+    facilityType: 'hospital'
+  },
+  {
+    id: 2,
+    name: 'Sunshine Pediatrics',
+    distance: 2.5,
+    rating: 4.9,
+    waitTime: 45,
+    address: '456 Oak Ave, Midtown',
+    latitude: 12.9250,
+    longitude: 79.1400,
+    facilityType: 'clinic'
+  },
+  {
+    id: 3,
+    name: 'Metro Care Center',
+    distance: 3.1,
+    rating: 4.5,
+    waitTime: 10,
+    address: '789 Pine Rd, Uptown',
+    latitude: 12.9050,
+    longitude: 79.1250,
+    facilityType: 'clinic'
+  },
+  {
+    id: 4,
+    name: 'Northside Family Clinic',
+    distance: 4.8,
+    rating: 4.7,
+    waitTime: 90,
+    address: '321 Elm St, North District',
+    latitude: 12.9300,
+    longitude: 79.1150,
+    facilityType: 'clinic'
+  }
+]
+
 export default function BookPage() {
   const navigate = useNavigate()
   
@@ -116,7 +164,8 @@ export default function BookPage() {
       if (userLocation && nearbyClinics.length > 0) {
         return nearbyClinics
       }
-      return allClinics
+      // Fallback to hardcoded clinics if no API data available
+      return allClinics.length > 0 ? allClinics : HARDCODED_CLINICS
     }
     return []
   }, [viewMode, searchResults, nearbyClinics, allClinics, userLocation, viewportClinics, userInteractedWithMap])
@@ -255,157 +304,119 @@ export default function BookPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-heading font-bold text-slate-900">Find & Book Clinics</h1>
-        <p className="text-slate-500 mt-2">Discover clinics near you or search by name</p>
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px', background: '#F8FAFC', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', padding: '0 20px' }}>
+        <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em', margin: 0 }}>
+          Clinics Near Your Location
+        </h1>
       </div>
 
-      {/* Search Bar */}
-      <div className="glass-panel p-6 rounded-2xl">
-        <div className="relative">
-          <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search for clinics..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-12 pr-12 text-sm font-medium text-slate-900 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-slate-400"
-          />
-          {searchQuery && (
-            <button
-              onClick={clearSearchAndShowMap}
-              className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setViewMode('map')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                viewMode === 'map' 
-                  ? 'bg-primary text-white shadow-md' 
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              <MapPin className="h-4 w-4" />
-              Map View
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                viewMode === 'list' 
-                  ? 'bg-primary text-white shadow-md' 
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              <ListFilter className="h-4 w-4" />
-              List View
-            </button>
-          </div>
-
-          {userLocation && (
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Navigation className="h-3 w-3" />
-              Location detected
-            </div>
-          )}
-        </div>
-
-        {locationError && (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
-            <div className="text-sm">
-              <p className="text-yellow-800 font-medium">Location access needed</p>
-              <p className="text-yellow-700">{locationError}</p>
-              <button 
-                onClick={getCurrentLocation}
-                className="text-yellow-800 underline hover:no-underline mt-1"
-              >
-                Try again
-              </button>
+      {/* Main Layout: Sidebar + Map */}
+      <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '32px', height: '700px', marginBottom: '32px' }}>
+        
+        {/* Sidebar - Clinic List */}
+        <div style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.1)' }}>
+          {/* Search Input */}
+          <div style={{ padding: '16px', borderBottom: '1px solid #E2E8F0' }}>
+            <div style={{ position: 'relative' }}>
+              <Search style={{ position: 'absolute', left: '12px', top: '12px', height: '18px', width: '18px', color: '#94A3B8' }} />
+              <input
+                type="text"
+                placeholder="Search city or clinic..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 12px 12px 40px',
+                  borderRadius: '10px',
+                  border: '1px solid #E2E8F0',
+                  outline: 'none',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: '14px',
+                  transition: 'all 0.2s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3B82F6'
+                  e.target.style.background = 'white'
+                  e.target.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.1)'
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#E2E8F0'
+                  e.target.style.boxShadow = 'none'
+                }}
+              />
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Map or Search Results */}
-      {viewMode === 'search' && searchQuery ? (
-        // Search Results
-        <div className="glass-panel p-6 rounded-2xl">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-800">
-              Search Results for "{searchQuery}"
-            </h2>
-            {searchLoading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
-          </div>
+          {/* Clinic Cards List */}
+          <div style={{ overflowY: 'auto', padding: '16px', height: 'calc(100% - 60px)' }}>
+            {HARDCODED_CLINICS.length > 0 ? (
+              HARDCODED_CLINICS.map((clinic) => {
+                const waitTime = clinic.waitTime || 0
+                let waitTimeColor = '#DCFCE7'
+                let waitTextColor = '#166534'
+                
+                if (waitTime > 60) {
+                  waitTimeColor = '#FEE2E2'
+                  waitTextColor = '#991B1B'
+                } else if (waitTime > 30) {
+                  waitTimeColor = '#FEF3C7'
+                  waitTextColor = '#92400E'
+                }
 
-          {searchResults.length > 0 ? (
-            <div className="space-y-4">
-              {searchResults.map((clinic) => (
-                <div 
-                  key={clinic.id}
-                  onClick={() => handleClinicSelect(clinic)}
-                  className={`cursor-pointer rounded-xl border p-5 transition-all duration-200 relative overflow-hidden ${
-                    selectedClinic?.id === clinic.id 
-                      ? 'border-primary bg-primary/5 shadow-md shadow-primary/10 ring-1 ring-primary' 
-                      : 'border-slate-200 bg-white hover:border-primary/30 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className={`font-bold text-lg ${selectedClinic?.id === clinic.id ? 'text-primary-dark' : 'text-slate-800'}`}>
-                        {clinic.name}
-                      </h3>
-                      <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
-                        <MapPin className="h-3 w-3" />
-                        {clinic.address}
-                      </p>
-                      <div className="flex gap-4 mt-3 text-xs">
-                        <span className="flex items-center gap-1 text-slate-600">
-                          <Clock className="h-3 w-3" />
-                          ~{clinic.stats?.estimatedWaitTime || 0} mins wait
-                        </span>
-                        <span className="flex items-center gap-1 text-slate-600">
-                          <Users className="h-3 w-3" />
-                          {clinic.stats?.totalInQueue || 0} in queue
-                        </span>
-                        <span className="flex items-center gap-1 text-slate-600">
-                          <Stethoscope className="h-3 w-3" />
-                          {clinic.doctors?.length || 0} doctors
-                        </span>
-                      </div>
+                return (
+                  <div
+                    key={clinic.id}
+                    onClick={() => handleClinicSelect(clinic)}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '16px',
+                      border: selectedClinic?.id === clinic.id ? '1px solid #3B82F6' : '1px solid #E2E8F0',
+                      marginBottom: '12px',
+                      transition: 'all 0.2s',
+                      cursor: 'pointer',
+                      background: selectedClinic?.id === clinic.id ? '#EFF6FF' : 'white',
+                      boxShadow: selectedClinic?.id === clinic.id ? '0 10px 25px -5px rgba(59, 130, 246, 0.1)' : 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedClinic?.id !== clinic.id) {
+                        e.currentTarget.style.borderColor = '#3B82F6'
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                        e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(59, 130, 246, 0.1)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedClinic?.id !== clinic.id) {
+                        e.currentTarget.style.borderColor = '#E2E8F0'
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow = 'none'
+                      }
+                    }}
+                  >
+                    <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '16px', color: selectedClinic?.id === clinic.id ? '#1D4ED8' : '#0F172A', marginBottom: '6px' }}>
+                      {clinic.name}
                     </div>
-                    {selectedClinic?.id === clinic.id && (
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                    )}
+                    <div style={{ fontSize: '13px', color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span>📍 {clinic.distance.toFixed(1)} miles away</span>
+                      <span>⭐ {clinic.rating}</span>
+                    </div>
+                    <div style={{ display: 'inline-block', marginTop: '10px', fontSize: '12px', fontWeight: 700, padding: '4px 10px', borderRadius: '20px', background: waitTimeColor, color: waitTextColor }}>
+                      ~{waitTime} mins wait
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            !searchLoading && (
-              <div className="text-center py-12 text-slate-500">
-                <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No clinics found matching "{searchQuery}"</p>
+                )
+              })
+            ) : (
+              <div style={{ textAlign: 'center', color: '#94A3B8', padding: '20px' }}>
+                No clinics available
               </div>
-            )
-          )}
-        </div>
-      ) : (
-        // Map View
-        <div className="glass-panel p-6 rounded-2xl">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-800">
-              {userLocation ? 'Nearby Clinics' : 'Clinics Map'}
-            </h2>
-            {isLoadingClinics && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+            )}
           </div>
+        </div>
 
+        {/* Map View */}
+        <div style={{ position: 'relative', borderRadius: '24px', border: '1px solid #E2E8F0', overflow: 'hidden', background: '#FFFFFF', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.1)', height: '100%' }}>
           <ClinicMap
             clinics={displayClinics}
             center={userLocation ? [userLocation.lat, userLocation.lng] : [12.9165, 79.1325]}
@@ -413,52 +424,98 @@ export default function BookPage() {
             onClinicSelect={handleClinicSelect}
             onBoundsChange={handleBoundsChange}
             userLocation={userLocation}
-            height="500px"
-            className="mb-4"
+            height="100%"
+            className=""
             loading={isLoadingClinics}
             viewportLoading={viewportLoading}
           />
 
-          {displayClinics.length === 0 && !isLoadingClinics && (
-            <div className="text-center py-8 text-slate-500">
-              <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No clinics found</p>
+          {/* Selected Clinic Overlay */}
+          {selectedClinic && (
+            <div style={{
+              position: 'absolute',
+              top: '20px',
+              left: '20px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              padding: '20px',
+              borderRadius: '16px',
+              width: '300px',
+              boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.1)',
+              border: '1px solid #E2E8F0',
+              zIndex: 10
+            }}>
+              <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: '18px', fontWeight: 800, marginBottom: '8px', color: '#0F172A' }}>
+                {selectedClinic.name}
+              </h3>
+              <p style={{ fontSize: '14px', color: '#475569', marginBottom: '16px' }}>
+                {selectedClinic.address || 'Address not available'}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 700, color: '#3B82F6' }}>Open Now</span>
+                <button
+                  onClick={() => {
+                    // Scroll to booking form if exists
+                    const form = document.querySelector('[data-booking-form]')
+                    if (form) form.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '12px',
+                    background: '#3B82F6',
+                    color: 'white',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#1D4ED8'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#3B82F6'}
+                >
+                  View Details
+                </button>
+              </div>
             </div>
           )}
+
+          {/* Zoom Buttons */}
+          <div style={{ position: 'absolute', bottom: '20px', right: '20px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 10 }}>
+            <button style={{ width: '40px', height: '40px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3B82F6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#E2E8F0'}>+</button>
+            <button style={{ width: '40px', height: '40px', background: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3B82F6'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#E2E8F0'}>-</button>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Clinic Selection Form - Only show when clinic is selected */}
       {selectedClinic && (
-        <form onSubmit={handleSubmit} className="glass-panel p-8 rounded-3xl space-y-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 pointer-events-none" />
+        <form onSubmit={handleSubmit} data-booking-form style={{ background: '#FFFFFF', borderRadius: '24px', border: '1px solid #E2E8F0', padding: '32px', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.1)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ content: '', position: 'absolute', top: 0, right: 0, width: '256px', height: '256px', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none' }} />
 
-          <h3 className="text-2xl font-bold text-slate-800 mb-6">
+          <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: '24px', fontWeight: 800, color: '#0F172A', marginBottom: '24px', position: 'relative', zIndex: 1 }}>
             Complete Booking at {selectedClinic.name}
           </h3>
 
           {/* Clinic Working Hours */}
           {clinicHours.length > 0 && (
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" />
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <Clock style={{ height: '16px', width: '16px', color: '#3B82F6' }} />
                 Clinic Working Hours
               </label>
-              <div className="grid grid-cols-7 gap-1">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                 {WEEK_DAYS.map((day) => {
                   const entry = clinicHours.find((h) => h.dayOfWeek === day.dayOfWeek)
                   const closed = !entry || entry.isClosed
                   return (
-                    <div key={day.dayOfWeek} className={`rounded-xl border p-2 text-center text-xs ${
-                      closed ? 'border-slate-100 bg-slate-50 text-slate-400' : 'border-primary/20 bg-primary/5 text-slate-700'
-                    }`}>
-                      <p className="font-bold mb-1">{day.label}</p>
+                    <div key={day.dayOfWeek} style={{ borderRadius: '12px', border: '1px solid', borderColor: closed ? '#E2E8F0' : '#DBEAFE', padding: '12px', textAlign: 'center', fontSize: '12px', background: closed ? '#F1F5F9' : '#EFF6FF', color: closed ? '#94A3B8' : '#475569' }}>
+                      <p style={{ fontWeight: 'bold', marginBottom: '4px' }}>{day.label}</p>
                       {closed ? (
-                        <span className="text-[10px] uppercase tracking-wide text-slate-400">Closed</span>
+                        <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94A3B8' }}>Closed</span>
                       ) : (
                         <>
                           <p>{fmtTime(entry.openTime)}</p>
-                          <p className="text-slate-400">–</p>
+                          <p style={{ color: '#94A3B8' }}>–</p>
                           <p>{fmtTime(entry.closeTime)}</p>
                         </>
                       )}
@@ -471,100 +528,114 @@ export default function BookPage() {
 
           {/* Doctor Selection */}
           {availableDoctors.length > 0 && (
-            <div className="space-y-4">
-              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Stethoscope className="h-4 w-4 text-primary" />
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <Stethoscope style={{ height: '16px', width: '16px', color: '#3B82F6' }} />
                 Select Doctor
               </label>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                 {availableDoctors.map((doc) => (
-                  <div 
+                  <div
                     key={doc.id}
                     onClick={() => setDoctorId(doc.id)}
-                    className={`cursor-pointer rounded-xl border p-4 transition-all duration-200 flex items-start gap-3 relative overflow-hidden ${
-                      doctorId === doc.id 
-                        ? 'border-primary bg-primary/5 shadow-md shadow-primary/10 ring-1 ring-primary' 
-                        : 'border-slate-200 bg-white hover:border-primary/30 hover:shadow-sm'
-                    }`}
+                    style={{
+                      cursor: 'pointer',
+                      borderRadius: '12px',
+                      border: doctorId === doc.id ? '1px solid #3B82F6' : '1px solid #E2E8F0',
+                      padding: '16px',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      background: doctorId === doc.id ? '#EFF6FF' : 'white',
+                      boxShadow: doctorId === doc.id ? '0 10px 25px -5px rgba(59, 130, 246, 0.1)' : 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (doctorId !== doc.id) {
+                        e.currentTarget.style.borderColor = '#DBEAFE'
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.05)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (doctorId !== doc.id) {
+                        e.currentTarget.style.borderColor = '#E2E8F0'
+                        e.currentTarget.style.boxShadow = 'none'
+                      }
+                    }}
                   >
-                    <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${doctorId === doc.id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
-                      <User className="h-5 w-5" />
+                    <div style={{ height: '40px', width: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', shrinkFlex: 0, background: doctorId === doc.id ? '#3B82F6' : '#F1F5F9', color: doctorId === doc.id ? 'white' : '#94A3B8', transition: 'all 0.2s' }}>
+                      <User style={{ height: '20px', width: '20px' }} />
                     </div>
-                    <div className="relative z-10">
-                      <p className={`font-bold ${doctorId === doc.id ? 'text-primary-dark' : 'text-slate-700'}`}>{doc.name}</p>
-                      <p className="text-xs text-slate-500 font-medium">{doc.specialty}</p>
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      <p style={{ fontWeight: 'bold', color: doctorId === doc.id ? '#1D4ED8' : '#1E293B' }}>{doc.name}</p>
+                      <p style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 500 }}>{doc.specialty}</p>
                     </div>
-                    {doctorId === doc.id && <div className="absolute top-2 right-2"><CheckCircle2 className="h-4 w-4 text-primary" /></div>}
+                    {doctorId === doc.id && <div style={{ position: 'absolute', top: '8px', right: '8px' }}><CheckCircle2 style={{ height: '16px', width: '16px', color: '#3B82F6' }} /></div>}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Doctor Availability */}
-          {doctorId && doctorAvailability.length > 0 && (
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Stethoscope className="h-4 w-4 text-primary" />
-                Doctor's Available Hours
-              </label>
-              <div className="grid grid-cols-7 gap-1">
-                {WEEK_DAYS.map((day) => {
-                  const slots = doctorAvailability.filter((s) => s.dayOfWeek === day.dayOfWeek)
-                  return (
-                    <div key={day.dayOfWeek} className={`rounded-xl border p-2 text-center text-xs ${
-                      slots.length === 0 ? 'border-slate-100 bg-slate-50 text-slate-400' : 'border-emerald-200 bg-emerald-50 text-slate-700'
-                    }`}>
-                      <p className="font-bold mb-1">{day.label}</p>
-                      {slots.length === 0 ? (
-                        <span className="text-[10px] uppercase tracking-wide text-slate-400">Off</span>
-                      ) : (
-                        slots.map((s, i) => (
-                          <p key={i} className="text-[10px] leading-tight">
-                            {fmtTime(s.startTime)}–{fmtTime(s.endTime)}
-                          </p>
-                        ))
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Date Selection */}
-          <div className="space-y-4">
-            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" />
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ fontSize: '14px', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <CalendarDays style={{ height: '16px', width: '16px', color: '#3B82F6' }} />
               Select Date
             </label>
-            <div className="relative group">
-              <CalendarDays className="absolute left-4 top-3.5 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-              <input 
-                type="date" 
+            <div style={{ position: 'relative' }}>
+              <CalendarDays style={{ position: 'absolute', left: '16px', top: '12px', height: '20px', width: '20px', color: '#94A3B8' }} />
+              <input
+                type="date"
                 required
                 min={new Date().toISOString().split('T')[0]}
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-12 pr-4 text-sm font-medium text-slate-900 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-slate-400"
+                style={{
+                  width: '100%',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
+                  paddingTop: '12px',
+                  paddingBottom: '12px',
+                  paddingLeft: '44px',
+                  paddingRight: '16px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: '#0F172A',
+                  outline: 'none',
+                  transition: 'all 0.2s'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#3B82F6'
+                  e.currentTarget.style.background = 'white'
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.1)'
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#E2E8F0'
+                  e.currentTarget.style.background = '#F8FAFC'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
               />
             </div>
           </div>
 
           {error && (
-            <div className="rounded-xl bg-red-50 p-4 border border-red-100 flex items-start gap-3 text-sm text-red-600 animate-in slide-in-from-top-2 fade-in duration-300">
-              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div style={{ borderRadius: '12px', background: '#FEE2E2', padding: '16px', border: '1px solid #FECACA', display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: '#DC2626', marginBottom: '24px' }}>
+              <AlertCircle style={{ height: '20px', width: '20px', shrinkFlex: 0, marginTop: '2px' }} />
               <p>{error}</p>
             </div>
           )}
 
-          <div className="pt-6 flex items-center justify-end gap-3 border-t border-slate-100">
+          <div style={{ paddingTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #E2E8F0' }}>
             <Button variant="ghost" onClick={() => setSelectedClinic(null)} type="button">
               Change Clinic
             </Button>
-            <Button type="submit" disabled={isSubmitting || !selectedClinic || !doctorId || !date} className="px-8 shadow-lg shadow-primary/20">
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Complete Booking'}
-              {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+            <Button type="submit" disabled={isSubmitting || !selectedClinic || !doctorId || !date} style={{ paddingLeft: '32px', paddingRight: '32px', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.2)' }}>
+              {isSubmitting ? <Loader2 style={{ height: '16px', width: '16px', animation: 'spin 1s linear infinite' }} /> : 'Complete Booking'}
+              {!isSubmitting && <ArrowRight style={{ height: '16px', width: '16px' }} />}
             </Button>
           </div>
         </form>

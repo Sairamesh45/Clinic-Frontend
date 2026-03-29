@@ -312,7 +312,7 @@ export default function ClinicMap({
   }
 
   return (
-    <div className={`relative rounded-xl overflow-hidden shadow-lg border border-slate-200 ${className}`}>
+    <div style={{ height: height }} className={`relative rounded-xl overflow-hidden shadow-lg border border-slate-200 ${className}`}>
       <MapContainer
         center={mapCenter}
         zoom={mapZoom}
